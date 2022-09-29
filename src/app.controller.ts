@@ -1,6 +1,7 @@
-import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 import { CreatePersonDto } from './dto/create-person.dto';
+import { TrustConnectionPairDto } from './dto/trust-connection-pair.dto';
 import { PeopleService } from './services/people.service';
 
 @Controller('api')
@@ -23,5 +24,14 @@ export class AppController {
     const person = await this.peopleService.addPerson(personData);
 
     return CreatePersonDto.fromPerson(person);
+  }
+
+  @Post('/people/:id/trust_connections')
+  @HttpCode(201)
+  async addTrustConnections(
+    @Param('id') personId: string,
+    @Body() pairs: TrustConnectionPairDto,
+  ): Promise<void> {
+    await this.peopleService.addTrustConnections(personId, pairs);
   }
 }
