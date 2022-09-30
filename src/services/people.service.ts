@@ -8,35 +8,35 @@ import { PeopleRepository } from '../repositories/people.repository';
 
 @Injectable()
 export class PeopleService {
-  constructor(private readonly peopleRepository: PeopleRepository) {}
+    constructor(private readonly peopleRepository: PeopleRepository) {}
 
-  async addPerson(personData: CreatePersonDto): Promise<Person> {
-    const person = new Person(personData.id, personData.topics);
+    async addPerson(personData: CreatePersonDto): Promise<Person> {
+        const person = new Person(personData.id, personData.topics);
 
-    return await this.peopleRepository.addPerson(person);
-  }
-
-  async addTrustConnections(
-    personId: string,
-    pairs: TrustConnectionPairDto,
-  ): Promise<void> {
-    if (!Object.keys(pairs).length) {
-      throw new LogicException(`List of relations cannot be empty`);
+        return await this.peopleRepository.addPerson(person);
     }
 
-    const person = await this.peopleRepository.findById(personId);
+    async addTrustConnections(
+        personId: string,
+        pairs: TrustConnectionPairDto,
+    ): Promise<void> {
+        if (!Object.keys(pairs).length) {
+            throw new LogicException(`List of relations cannot be empty`);
+        }
 
-    if (!person) {
-      throw new LogicException(
-        `Person with id "${personId}" not found`,
-        HttpStatus.NOT_FOUND,
-      );
+        const person = await this.peopleRepository.findById(personId);
+
+        if (!person) {
+            throw new LogicException(
+                `Person with id "${personId}" not found`,
+                HttpStatus.NOT_FOUND,
+            );
+        }
+
+        const relations = Object.entries(pairs).map(
+            ([personId, trustLevel]) => new Relation(personId, trustLevel),
+        );
+
+        this.peopleRepository.addRelations(person, relations);
     }
-
-    const relations = Object.entries(pairs).map(
-      ([personId, trustLevel]) => new Relation(personId, trustLevel),
-    );
-
-    this.peopleRepository.addRelations(person, relations);
-  }
 }

@@ -1,3 +1,3 @@
 export class TrustConnectionPairDto {
-  [personId: string]: number;
+    [personId: string]: number;
 }

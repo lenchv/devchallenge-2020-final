@@ -4,23 +4,23 @@ import { Person } from '../entities/person';
 
 @Injectable()
 export class PeopleRepository {
-  people: Person[] = [];
+    people: Person[] = [];
 
-  findById(id: string): Person | undefined {
-    return this.people.find((person) => person.id === id);
-  }
+    findById(id: string): Person | undefined {
+        return this.people.find((person) => person.id === id);
+    }
 
-  addPerson(person: Person) {
-    this.people.push(person);
+    addPerson(person: Person) {
+        this.people.push(person);
 
-    return person;
-  }
+        return person;
+    }
 
-  addRelations(person: Person, relations: Relation[]) {
-    relations.forEach((relation) => {
-      person.addRelation(relation);
-    });
+    addRelations(person: Person, relations: Relation[]) {
+        relations.forEach((relation) => {
+            person.addRelation(relation);
+        });
 
-    return person;
-  }
+        return person;
+    }
 }

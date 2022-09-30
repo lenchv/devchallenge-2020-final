@@ -4,12 +4,12 @@ import { LogicException } from './exceptions/logic.exception';
 
 @Catch()
 export class AppExceptionsFilter implements ExceptionFilter {
-  catch(exception: LogicException, host: ArgumentsHost): void {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
+    catch(exception: LogicException, host: ArgumentsHost): void {
+        const ctx = host.switchToHttp();
+        const response = ctx.getResponse<Response>();
 
-    response.status(exception.httpStatus).json({
-      message: exception.message,
-    });
-  }
+        response.status(exception.httpStatus).json({
+            message: exception.message,
+        });
+    }
 }
