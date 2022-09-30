@@ -10,18 +10,18 @@ export class Relation {
         this._trustLevel = new Level(trustLevel);
     }
 
-    get id(): string {
-        return String(this._id);
+    get id(): Id {
+        return this._id;
     }
 
-    get trustLevel(): number {
-        return Number(this._trustLevel);
+    get trustLevel(): Level {
+        return this._trustLevel;
     }
 
     toJSON() {
         return {
-            id: this.id,
-            trustLevel: this.trustLevel,
+            id: String(this.id),
+            trustLevel: Number(this.trustLevel),
         };
     }
 }

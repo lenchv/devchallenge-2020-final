@@ -1,19 +1,14 @@
 import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
-import { AppService } from './app.service';
 import { BroadcastMessage } from './dto/broadcast-message.dto';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { MessageResponse } from './dto/message-response.dto';
 import { TrustConnectionPairDto } from './dto/trust-connection-pair.dto';
+import { MessageService } from './services/message.service';
 import { PeopleService } from './services/people.service';
 
 @Controller('api')
 export class AppController {
-    constructor(private readonly appService: AppService, private readonly peopleService: PeopleService) {}
-
-    @Get()
-    getHello(): string {
-        return this.appService.getHello();
-    }
+    constructor(private readonly messageService: MessageService, private readonly peopleService: PeopleService) {}
 
     @Post('/people')
     @HttpCode(201)
@@ -31,7 +26,7 @@ export class AppController {
 
     @Post('/messages')
     @HttpCode(201)
-    broadcastMessage(@Body() message: BroadcastMessage): Promise<MessageResponse> {
-        return;
+    async broadcastMessage(@Body() message: BroadcastMessage): Promise<MessageResponse> {
+        return this.messageService.broadcastMessage(message);
     }
 }

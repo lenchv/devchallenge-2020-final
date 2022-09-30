@@ -2,15 +2,17 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { AppExceptionsFilter } from './app-exceptions.filter';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { PeopleRepository } from './repositories/people.repository';
+import { MessageService } from './services/message.service';
+import { NotificationService } from './services/notification.service';
 import { PeopleService } from './services/people.service';
 
 @Module({
     imports: [],
     controllers: [AppController],
     providers: [
-        AppService,
+        MessageService,
+        NotificationService,
         PeopleService,
         PeopleRepository,
         {

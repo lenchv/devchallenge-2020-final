@@ -25,19 +25,27 @@ export class Person {
         this._topics = topics.map((topic) => new Topic(topic));
     }
 
-    addRelation(relation: Relation): void {
-        this._pairs.push(relation);
-    }
-
     get pairs(): Relation[] {
         return this._pairs;
     }
 
-    get id(): string {
-        return String(this._id);
+    get id(): Id {
+        return this._id;
     }
 
-    get topics(): string[] {
-        return this._topics.map((topic) => String(topic));
+    get topics(): Topic[] {
+        return this._topics;
+    }
+
+    addRelation(relation: Relation): void {
+        this._pairs.push(relation);
+    }
+
+    toJSON() {
+        return {
+            id: String(this._id),
+            topics: this._topics.map((topic) => String(topic)),
+            relations: this._pairs.map((r) => r.toJSON()),
+        };
     }
 }

@@ -14,7 +14,11 @@ export class Level {
         this.value = value;
     }
 
-    valueOf() {
+    valueOf(): number {
         return this.value;
+    }
+
+    equalsTo(level: Level): boolean {
+        return this.value === level.value;
     }
 }

@@ -6,9 +6,10 @@ export class CreatePersonDto {
 
     static fromPerson(person: Person) {
         const dto = new CreatePersonDto();
+        const data = person.toJSON();
 
-        dto.id = person.id;
-        dto.topics = person.topics;
+        dto.id = data.id;
+        dto.topics = data.topics;
 
         return dto;
     }

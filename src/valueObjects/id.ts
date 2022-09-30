@@ -15,7 +15,11 @@ export class Id {
         this.id = String(id);
     }
 
-    toString() {
+    toString(): string {
         return this.id;
+    }
+
+    equalsTo(id: Id): boolean {
+        return id.id === this.id;
     }
 }

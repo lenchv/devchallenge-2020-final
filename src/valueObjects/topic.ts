@@ -15,7 +15,11 @@ export class Topic {
         this.value = String(value);
     }
 
-    toString() {
+    toString(): string {
         return this.value;
+    }
+
+    equalsTo(topic: Topic): boolean {
+        return this.value === topic.value;
     }
 }
