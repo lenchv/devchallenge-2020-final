@@ -16,10 +16,7 @@ export class PeopleService {
         return await this.peopleRepository.addPerson(person);
     }
 
-    async addTrustConnections(
-        personId: string,
-        pairs: TrustConnectionPairDto,
-    ): Promise<void> {
+    async addTrustConnections(personId: string, pairs: TrustConnectionPairDto): Promise<void> {
         if (!Object.keys(pairs).length) {
             throw new LogicException(`List of relations cannot be empty`);
         }
@@ -27,15 +24,10 @@ export class PeopleService {
         const person = await this.peopleRepository.findById(personId);
 
         if (!person) {
-            throw new LogicException(
-                `Person with id "${personId}" not found`,
-                HttpStatus.NOT_FOUND,
-            );
+            throw new LogicException(`Person with id "${personId}" not found`, HttpStatus.NOT_FOUND);
         }
 
-        const relations = Object.entries(pairs).map(
-            ([personId, trustLevel]) => new Relation(personId, trustLevel),
-        );
+        const relations = Object.entries(pairs).map(([personId, trustLevel]) => new Relation(personId, trustLevel));
 
         this.peopleRepository.addRelations(person, relations);
     }

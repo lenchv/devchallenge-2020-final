@@ -11,15 +11,11 @@ describe('PeopleService', () => {
 
         peopleService = new PeopleService(peopleRepository);
 
-        jest.spyOn(peopleRepository, 'addPerson').mockImplementation(
-            (person) => person,
-        );
-        jest.spyOn(peopleRepository, 'addRelations').mockImplementation(
-            (p, relations) => {
-                relations.forEach((r) => p.addRelation(r));
-                return p;
-            },
-        );
+        jest.spyOn(peopleRepository, 'addPerson').mockImplementation((person) => person);
+        jest.spyOn(peopleRepository, 'addRelations').mockImplementation((p, relations) => {
+            relations.forEach((r) => p.addRelation(r));
+            return p;
+        });
     });
 
     describe('addPerson', () => {
@@ -51,9 +47,7 @@ describe('PeopleService', () => {
     describe('addTrustConnections', () => {
         it('should add relations', async () => {
             const p = new Person('Gary', ['books', 'magic']);
-            jest.spyOn(peopleRepository, 'findById').mockImplementation(
-                () => p,
-            );
+            jest.spyOn(peopleRepository, 'findById').mockImplementation(() => p);
 
             await peopleService.addTrustConnections('Gary', {
                 Voldemort: 1,
@@ -86,9 +80,7 @@ describe('PeopleService', () => {
 
         it('should throw error if relations are invalid', async () => {
             const p = new Person('Gary', ['books', 'magic']);
-            jest.spyOn(peopleRepository, 'findById').mockImplementation(
-                () => p,
-            );
+            jest.spyOn(peopleRepository, 'findById').mockImplementation(() => p);
             await Promise.all(
                 [-1, 10].map(async (level) => {
                     try {
@@ -96,9 +88,7 @@ describe('PeopleService', () => {
                             Hermoine: level,
                         });
                     } catch (e) {
-                        expect(e.message).toBe(
-                            'Level must be greater than 0 and not higher 10',
-                        );
+                        expect(e.message).toBe('Level must be greater than 0 and not higher 10');
                     }
                 }),
             );

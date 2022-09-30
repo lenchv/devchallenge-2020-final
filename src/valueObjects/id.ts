@@ -9,9 +9,7 @@ export class Id {
         }
 
         if (typeof id === 'object') {
-            throw new LogicException(
-                'id should have simple type: string, number',
-            );
+            throw new LogicException('id should have simple type: string, number');
         }
 
         this.id = String(id);

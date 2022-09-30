@@ -45,9 +45,7 @@ describe('AppController (e2e)', () => {
     });
 
     it('POST /api/people/<id>/trust_connections success', async () => {
-        await peopleRepository.addPerson(
-            new Person('Gary', ['books', 'magic']),
-        );
+        await peopleRepository.addPerson(new Person('Gary', ['books', 'magic']));
 
         return request(app.getHttpServer())
             .post('/api/people/Gary/trust_connections')
@@ -56,9 +54,7 @@ describe('AppController (e2e)', () => {
     });
 
     it('POST /api/people/<id>/trust_connections invalid values', async () => {
-        await peopleRepository.addPerson(
-            new Person('Gary', ['books', 'magic']),
-        );
+        await peopleRepository.addPerson(new Person('Gary', ['books', 'magic']));
 
         return request(app.getHttpServer())
             .post('/api/people/Gary/trust_connections')

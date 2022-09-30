@@ -8,9 +8,7 @@ export class Level {
             throw new LogicException('value must be a valid number');
         }
         if (value < 0 || value > 10) {
-            throw new LogicException(
-                'Level must be greater than 0 and not higher 10',
-            );
+            throw new LogicException('Level must be greater than 0 and not higher 10');
         }
 
         this.value = value;
