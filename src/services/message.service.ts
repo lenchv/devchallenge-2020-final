@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { PeopleRepository } from '../repositories/people.repository';
 import { Topic } from '../valueObjects/topic';
 import { BroadcastMessage } from '../dto/broadcast-message.dto';
@@ -24,12 +24,16 @@ export class MessageService {
             throw new LogicException('Message text cannot be empty');
         }
 
-        if (typeof message.text === 'string') {
+        if (typeof message.text !== 'string') {
             throw new LogicException('Message text must be string');
         }
 
         if (!Array.isArray(message.topics)) {
             throw new LogicException('Topics must be an array of strings');
+        }
+
+        if (message.topics.length === 0) {
+            throw new LogicException('Topics cannot be empty');
         }
 
         const text: string = message.text;
@@ -38,9 +42,19 @@ export class MessageService {
         const minTrustLevel = new Level(message.min_trust_level);
         const person = await this.peopleRepository.findById(personId);
 
-        return this.depthFirstTracing(person, topics, minTrustLevel, [], async (recipient: Person): Promise<void> => {
-            this.notificationService.send(person, recipient, text);
-        });
+        if (!person) {
+            throw new LogicException(`Person with id "${personId}" not found`, HttpStatus.NOT_FOUND);
+        }
+
+        return this.depthFirstTracing(
+            person,
+            topics,
+            minTrustLevel,
+            [personId],
+            async (recipient: Person): Promise<void> => {
+                this.notificationService.send(person, recipient, text);
+            },
+        );
     }
 
     async depthFirstTracing(
@@ -58,6 +72,11 @@ export class MessageService {
         );
         const siblingsId = relations.map((r) => r.id);
         const newVisited = [...visited, ...siblingsId];
+        
+        if (siblingsId.length === 0) {
+            return {};
+        }
+
         const siblings = await this.peopleRepository.findByCriteria([
             new PersonCriteria(siblingsId),
             new TopicsCriteria(topics),
