@@ -19,9 +19,7 @@ export class PeopleRepository {
     }
 
     async addRelations(person: Person, relations: Relation[]): Promise<Person> {
-        relations.forEach((relation) => {
-            person.addRelation(relation);
-        });
+        person.setRelations(relations);
 
         return person;
     }

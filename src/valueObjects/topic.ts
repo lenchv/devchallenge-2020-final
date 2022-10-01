@@ -3,7 +3,12 @@ import { LogicException } from '../exceptions/logic.exception';
 export class Topic {
     public readonly value: string;
 
-    constructor(value: string) {
+    constructor(value: string | Topic) {
+        if (value instanceof Topic) {
+            this.value = value.value;
+            return;
+        }
+
         if (!value) {
             throw new LogicException('topic cannot be empty');
         }

@@ -13,6 +13,11 @@ export class PeopleService {
 
     async addPerson(personData: CreatePersonDto): Promise<Person> {
         const person = new Person(personData.id, personData.topics);
+        const existedPerson = await this.peopleRepository.findById(person.id);
+
+        if (existedPerson) {
+            throw new LogicException(`User "${personData.id}" already exists`);
+        }
 
         return await this.peopleRepository.addPerson(person);
     }

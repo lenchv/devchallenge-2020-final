@@ -37,8 +37,8 @@ export class Person {
         return this._topics;
     }
 
-    addRelation(relation: Relation): void {
-        this._pairs.push(relation);
+    setRelations(relations: Relation[]): void {
+        this._pairs = relations;
     }
 
     toJSON() {

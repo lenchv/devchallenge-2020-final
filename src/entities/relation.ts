@@ -2,10 +2,10 @@ import { Level } from '../valueObjects/level';
 import { Id } from '../valueObjects/id';
 
 export class Relation {
-    private readonly _id: Id;
-    private readonly _trustLevel: Level;
+    private _id: Id;
+    private _trustLevel: Level;
 
-    constructor(id: string, trustLevel: number) {
+    constructor(id: string | Id, trustLevel: number | Level) {
         this._id = new Id(id);
         this._trustLevel = new Level(trustLevel);
     }

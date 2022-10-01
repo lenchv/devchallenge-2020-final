@@ -46,14 +46,28 @@ describe('MessageService', () => {
             );
         });
 
+        it('should return empty object if no recipients found', async () => {
+            const gary = new Person('Gary', ['books', 'magic', 'movies']);
+
+            jest.spyOn(peopleRepository, 'findById').mockImplementation(async () => gary);
+            jest.spyOn(peopleRepository, 'findByCriteria').mockImplementation(async () => []);
+
+            const result = await messageService.broadcastMessage({
+                text: 'hi',
+                from_person_id: 'Gary',
+                topics: ['magic'],
+                min_trust_level: 10,
+            });
+
+            expect(result).toStrictEqual({});
+        });
+
         it('should notify neighbors correctly', async () => {
             const gary = new Person('Gary', ['books', 'magic', 'movies']);
             const hermoine = new Person('Hermoine', ['books', 'magic']);
             const ron = new Person('Ron', ['movies', 'magic']);
 
-            gary.addRelation(new Relation('Ron', 10));
-            gary.addRelation(new Relation('Hermoine', 10));
-            gary.addRelation(new Relation('Snape', 4));
+            gary.setRelations([new Relation('Ron', 10), new Relation('Hermoine', 10), new Relation('Snape', 4)]);
 
             let criteriaCallsCount = 0;
             jest.spyOn(peopleRepository, 'findById').mockImplementation(async () => gary);
@@ -78,15 +92,14 @@ describe('MessageService', () => {
             });
         });
 
-        it.only('should not notify twice', async () => {
+        it('should not notify twice', async () => {
             const gary = new Person('Gary', ['books', 'magic', 'movies']);
             const hermoine = new Person('Hermoine', ['books', 'magic']);
             const ron = new Person('Ron', ['movies', 'magic']);
 
-            gary.addRelation(new Relation('Ron', 10));
-            gary.addRelation(new Relation('Hermoine', 10));
-            hermoine.addRelation(new Relation('Ron', 10));
-            ron.addRelation(new Relation('Gary', 10));
+            gary.setRelations([new Relation('Ron', 10), new Relation('Hermoine', 10)]);
+            hermoine.setRelations([new Relation('Ron', 10)]);
+            ron.setRelations([new Relation('Gary', 10)]);
 
             let criteriaCallsCount = 0;
             jest.spyOn(peopleRepository, 'findById').mockImplementation(async () => gary);
@@ -111,21 +124,19 @@ describe('MessageService', () => {
             });
         });
 
-        it.only('should notify through neighbors', async () => {
+        it('should notify through neighbors', async () => {
             const gary = new Person('Gary', ['books', 'magic', 'movies']);
             const hermoine = new Person('Hermoine', ['books', 'magic']);
             const ron = new Person('Ron', ['movies', 'magic']);
             const jinnie = new Person('Jinnie', ['books', 'magic']);
 
-            gary.addRelation(new Relation('Hermoine', 10));
-            gary.addRelation(new Relation('Ron', 10));
-            hermoine.addRelation(new Relation('Ron', 10));
-            ron.addRelation(new Relation('Gary', 10));
-            ron.addRelation(new Relation('Jinnie', 10));
+            gary.setRelations([new Relation('Hermoine', 10), new Relation('Ron', 10)]);
+            hermoine.setRelations([new Relation('Ron', 10)]);
+            ron.setRelations([new Relation('Gary', 10), new Relation('Jinnie', 10)]);
 
             let criteriaCallsCount = 0;
             jest.spyOn(peopleRepository, 'findById').mockImplementation(async () => gary);
-            jest.spyOn(peopleRepository, 'findByCriteria').mockImplementation(async (criterias) => {
+            jest.spyOn(peopleRepository, 'findByCriteria').mockImplementation(async () => {
                 if (criteriaCallsCount === 0) {
                     criteriaCallsCount++;
                     return [hermoine, ron];

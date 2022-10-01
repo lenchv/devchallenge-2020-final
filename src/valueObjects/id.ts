@@ -3,7 +3,12 @@ import { LogicException } from '../exceptions/logic.exception';
 export class Id {
     public readonly id: string;
 
-    constructor(id: string) {
+    constructor(id: string | Id) {
+        if (id instanceof Id) {
+            this.id = id.id;
+            return;
+        }
+
         if (!id) {
             throw new LogicException('id cannot be empty');
         }

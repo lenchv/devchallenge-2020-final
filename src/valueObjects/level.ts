@@ -3,7 +3,12 @@ import { LogicException } from '../exceptions/logic.exception';
 export class Level {
     public readonly value: number;
 
-    constructor(value: number) {
+    constructor(value: number | Level) {
+        if (value instanceof Level) {
+            this.value = value.value;
+            return;
+        }
+
         if (isNaN(value)) {
             throw new LogicException('value must be a valid number');
         }

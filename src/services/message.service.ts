@@ -72,7 +72,7 @@ export class MessageService {
         );
         const siblingsId = relations.map((r) => r.id);
         const newVisited = [...visited, ...siblingsId];
-        
+
         if (siblingsId.length === 0) {
             return {};
         }

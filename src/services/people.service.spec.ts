@@ -13,7 +13,7 @@ describe('PeopleService', () => {
 
         jest.spyOn(peopleRepository, 'addPerson').mockImplementation((person) => Promise.resolve(person));
         jest.spyOn(peopleRepository, 'addRelations').mockImplementation((p, relations) => {
-            relations.forEach((r) => p.addRelation(r));
+            p.setRelations(relations);
             return Promise.resolve(p);
         });
     });
@@ -57,6 +57,28 @@ describe('PeopleService', () => {
             expect(p.pairs.map((p) => p.toJSON())).toStrictEqual([
                 { id: 'Voldemort', trustLevel: 1 },
                 { id: 'Snape', trustLevel: 4 },
+            ]);
+        });
+
+        it('should update relations', async () => {
+            const p = new Person('Gary', ['books', 'magic']);
+            jest.spyOn(peopleRepository, 'findById').mockImplementation(() => Promise.resolve(p));
+
+            await peopleService.addTrustConnections('Gary', {
+                Voldemort: 1,
+                Snape: 4,
+            });
+
+            await peopleService.addTrustConnections('Gary', {
+                Snape: 6,
+                Voldemort: 1,
+                Ron: 10,
+            });
+
+            expect(p.pairs.map((p) => p.toJSON())).toStrictEqual([
+                { id: 'Snape', trustLevel: 6 },
+                { id: 'Voldemort', trustLevel: 1 },
+                { id: 'Ron', trustLevel: 10 },
             ]);
         });
 
