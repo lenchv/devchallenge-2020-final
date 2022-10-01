@@ -1,7 +1,8 @@
-import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Param, Post } from '@nestjs/common';
 import { BroadcastMessage } from './dto/broadcast-message.dto';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { MessageResponse } from './dto/message-response.dto';
+import { ShortPathResponse } from './dto/short-path-response.dto';
 import { TrustConnectionPairDto } from './dto/trust-connection-pair.dto';
 import { MessageService } from './services/message.service';
 import { PeopleService } from './services/people.service';
@@ -28,5 +29,11 @@ export class AppController {
     @HttpCode(201)
     async broadcastMessage(@Body() message: BroadcastMessage): Promise<MessageResponse> {
         return this.messageService.broadcastMessage(message);
+    }
+
+    @Post('/path')
+    @HttpCode(201)
+    async findShortestPath(@Body() message: BroadcastMessage): Promise<ShortPathResponse> {
+        return this.messageService.findShortestPath(message);
     }
 }

@@ -9,10 +9,7 @@ class Relation {
     trustLevel: number;
 }
 
-@Schema({
-    autoIndex: false,
-    id: false,
-})
+@Schema()
 export class Person {
     @Prop({ unique: true })
     id: string;

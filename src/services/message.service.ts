@@ -12,6 +12,15 @@ import { TopicsCriteria } from '../repositories/mongo/criterions/topics.criteria
 import { Person } from '../entities/Person';
 import { NotificationService } from './notification.service';
 import { LogicException } from '../exceptions/logic.exception';
+import { Queue } from '@datastructures-js/queue';
+import { ShortPathResponse } from '../dto/short-path-response.dto';
+
+type MessageData = {
+    text: string;
+    topics: Topic[];
+    personId: Id;
+    minTrustLevel: Level;
+};
 
 @Injectable()
 export class MessageService {
@@ -20,7 +29,7 @@ export class MessageService {
         private readonly notificationService: NotificationService,
     ) {}
 
-    async broadcastMessage(message: BroadcastMessage): Promise<MessageResponse> {
+    private getMessageData(message: BroadcastMessage): MessageData {
         if (!message.text) {
             throw new LogicException('Message text cannot be empty');
         }
@@ -41,6 +50,12 @@ export class MessageService {
         const topics: Topic[] = message.topics.map((topic) => new Topic(topic));
         const personId = new Id(message.from_person_id);
         const minTrustLevel = new Level(message.min_trust_level);
+
+        return { text, topics, personId, minTrustLevel };
+    }
+
+    async broadcastMessage(message: BroadcastMessage): Promise<MessageResponse> {
+        const { text, topics, personId, minTrustLevel } = this.getMessageData(message);
         const person = await this.peopleRepository.findById(personId);
 
         if (!person) {
@@ -49,7 +64,7 @@ export class MessageService {
         const visited = new Map();
         visited.set(String(person.id), true);
 
-        const response = await this.tracePeopleGraph(
+        const response = await this.traversePeopleGraphInDepth(
             person,
             topics,
             minTrustLevel,
@@ -64,7 +79,25 @@ export class MessageService {
         return response;
     }
 
-    async tracePeopleGraph(
+    async findShortestPath(message: BroadcastMessage): Promise<ShortPathResponse> {
+        const { topics, personId, minTrustLevel } = this.getMessageData(message);
+        const person = await this.peopleRepository.findById(personId);
+
+        if (!person) {
+            throw new LogicException(`Person with id "${personId}" not found`, HttpStatus.NOT_FOUND);
+        }
+        const visited = new Map();
+        visited.set(String(person.id), true);
+
+        const path = await this.traversePeopleGraphInBreadth(person, topics, minTrustLevel, visited);
+
+        return {
+            from: String(personId),
+            path: path.map(String),
+        };
+    }
+
+    async traversePeopleGraphInDepth(
         person: Person,
         topics: Topic[],
         minTrustLevel: Level,
@@ -107,5 +140,55 @@ export class MessageService {
         }
 
         return result;
+    }
+
+    async traversePeopleGraphInBreadth(
+        person: Person,
+        topics: Topic[],
+        minTrustLevel: Level,
+        visited: Map<string, boolean>,
+    ): Promise<Id[]> {
+        const isVisited = (id: Id, visited: Map<string, boolean>) => visited.has(String(id));
+        const isLevelAccepted = (level: Level, minTrustLevel: Level) => Number(level) >= Number(minTrustLevel);
+        const areTopicsAccepted = (person: Person, topics: Topic[]) =>
+            topics.every((topic) => person.topics.some((t) => t.equalsTo(topic)));
+        const getPath = (resultMap: Map<string, Id>, root: Id, id?: Id): Id[] =>
+            id.equalsTo(root) ? [] : [...getPath(resultMap, root, resultMap.get(String(id))), id];
+
+        const persons = new Queue<Person>();
+        persons.enqueue(person);
+        const result: Map<string, Id> = new Map();
+
+        while (persons.size()) {
+            const current = persons.dequeue();
+
+            const relations = current.pairs.filter(
+                (relation) => isLevelAccepted(relation.trustLevel, minTrustLevel) && !isVisited(relation.id, visited),
+            );
+            const siblingsId = relations.map((r) => {
+                visited.set(String(r.id), true);
+                return r.id;
+            });
+
+            if (siblingsId.length === 0) {
+                continue;
+            }
+
+            const siblings = await this.peopleRepository.findByCriteria([new PersonCriteria(siblingsId)]);
+
+            for (let i = 0; i < siblings.length; i++) {
+                const sibling = siblings[i];
+
+                result.set(String(sibling.id), current.id);
+
+                if (areTopicsAccepted(sibling, topics)) {
+                    return getPath(result, person.id, sibling.id);
+                }
+
+                persons.enqueue(sibling);
+            }
+        }
+
+        return [];
     }
 }

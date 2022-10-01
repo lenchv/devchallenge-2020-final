@@ -242,6 +242,87 @@ describe('AppController (e2e)', () => {
         });
     });
 
+    describe('POST /api/path', () => {
+        beforeEach(async () => {
+            const gary = new Person('Gary', ['books', 'magic', 'movies']);
+            const hermoine = new Person('Hermoine', ['books', 'magic']);
+            const ron = new Person('Ron', ['magic', 'movies']);
+            const snape = new Person('Snape', ['poisons', 'magic', 'books', 'evil']);
+            const voldemort = new Person('Voldemort', ['evil', 'magic']);
+            const malfoy = new Person('Malfoy', ['magic', 'books', 'evil']);
+            const jinnie = new Person('Jinnie', ['movies', 'magic', 'books']);
+            const greg = new Person('Greg', ['movies', 'magic']);
+            const beatrice = new Person('Beatrice', ['books', 'magic']);
+            const relations: [Person, ...[string, number][]][] = [
+                [gary, ['Hermoine', 10], ['Ron', 10], ['Snape', 4], ['Voldemort', 1]],
+                [hermoine, ['Gary', 10], ['Ron', 10], ['Greg', 6], ['Snape', 5]],
+                [ron, ['Gary', 10], ['Hermoine', 10], ['Jinnie', 9]],
+                [greg, ['Malfoy', 8]],
+                [malfoy, ['Snape', 9]],
+                [snape, ['Beatrice', 8], ['Voldemort', 6]],
+                [jinnie, ['Greg', 5], ['Ron', 8]],
+            ];
+            relations.forEach(([person, ...relationData]) => {
+                person.setRelations(relationData.map(([id, trust]) => new Relation(id, trust)));
+            });
+
+            await [gary, hermoine, ron, snape, voldemort, malfoy, jinnie, greg, beatrice].reduce(
+                async (prev: Promise<void>, person) => {
+                    await prev;
+                    await peopleRepository.addPerson(person);
+                },
+                Promise.resolve(),
+            );
+        });
+        it('find who can brew poison among evil ones', async () => {
+            await request(app.getHttpServer())
+                .post('/api/path')
+                .send({
+                    text: 'Need a poison, ASAP!',
+                    topics: ['evil', 'poisons'],
+                    from_person_id: 'Gary',
+                    min_trust_level: 6,
+                })
+                .expect(201)
+                .expect({
+                    from: 'Gary',
+                    path: ['Hermoine', 'Greg', 'Malfoy', 'Snape'],
+                });
+        });
+
+        it('find shorter path who can brew poison among evil ones', async () => {
+            await request(app.getHttpServer())
+                .post('/api/path')
+                .send({
+                    text: 'Need a poison, ASAP!',
+                    topics: ['evil', 'poisons'],
+                    from_person_id: 'Gary',
+                    min_trust_level: 5,
+                })
+                .expect(201)
+                .expect({
+                    from: 'Gary',
+                    path: ['Hermoine', 'Snape'],
+                });
+        });
+
+        it('find the shortest path who can brew poison among evil ones', async () => {
+            await request(app.getHttpServer())
+                .post('/api/path')
+                .send({
+                    text: 'Need a poison, ASAP!',
+                    topics: ['evil', 'poisons'],
+                    from_person_id: 'Gary',
+                    min_trust_level: 4,
+                })
+                .expect(201)
+                .expect({
+                    from: 'Gary',
+                    path: ['Snape'],
+                });
+        });
+    });
+
     describe('test performance', () => {
         jest.setTimeout(600000);
         it('perfomrance', async () => {
