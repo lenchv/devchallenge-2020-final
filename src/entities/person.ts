@@ -45,7 +45,7 @@ export class Person {
         return {
             id: String(this._id),
             topics: this._topics.map((topic) => String(topic)),
-            relations: this._pairs.map((r) => r.toJSON()),
+            pairs: this._pairs.map((r) => r.toJSON()),
         };
     }
 }

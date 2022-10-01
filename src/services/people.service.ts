@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { TrustConnectionPairDto } from '../dto/trust-connection-pair.dto';
 import { Relation } from '../entities/relation';
 import { LogicException } from '../exceptions/logic.exception';
@@ -9,7 +9,7 @@ import { Id } from '../valueObjects/id';
 
 @Injectable()
 export class PeopleService {
-    constructor(private readonly peopleRepository: PeopleRepository) {}
+    constructor(@Inject('PeopleRepository') private readonly peopleRepository: PeopleRepository) {}
 
     async addPerson(personData: CreatePersonDto): Promise<Person> {
         const person = new Person(personData.id, personData.topics);

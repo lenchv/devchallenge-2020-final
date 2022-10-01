@@ -1,4 +1,4 @@
-import { Person } from '../entities/Person';
+import { Person } from '../entities/person';
 import { PeopleRepository } from '../repositories/people.repository';
 import { PeopleService } from './people.service';
 
@@ -7,8 +7,13 @@ describe('PeopleService', () => {
     let peopleRepository: PeopleRepository;
 
     beforeEach(() => {
-        peopleRepository = new PeopleRepository();
-
+        peopleRepository = <PeopleRepository>{
+            findById: jest.fn(),
+            findByCriteria: jest.fn(),
+            addRelations: jest.fn(),
+            addPerson: jest.fn(),
+            wipe: jest.fn(),
+        };
         peopleService = new PeopleService(peopleRepository);
 
         jest.spyOn(peopleRepository, 'addPerson').mockImplementation((person) => Promise.resolve(person));

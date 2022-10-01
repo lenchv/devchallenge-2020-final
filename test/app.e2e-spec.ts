@@ -20,7 +20,12 @@ describe('AppController (e2e)', () => {
         app = moduleFixture.createNestApplication();
         await app.init();
 
-        peopleRepository = app.get(PeopleRepository);
+        peopleRepository = app.get('PeopleRepository');
+        await peopleRepository.wipe();
+    });
+
+    afterEach(async () => {
+        await app.close();
     });
 
     it('POST /api/people/ success', () => {
@@ -59,8 +64,8 @@ describe('AppController (e2e)', () => {
 
         const gary1 = await peopleRepository.findById(new Id('Gary'));
         const gary2 = await peopleRepository.findById(new Id('gAry'));
-        expect(gary1.toJSON()).toStrictEqual({ id: 'Gary', topics: ['books'], relations: [] });
-        expect(gary2.toJSON()).toStrictEqual({ id: 'gAry', topics: ['books'], relations: [] });
+        expect(gary1.toJSON()).toStrictEqual({ id: 'Gary', topics: ['books'], pairs: [] });
+        expect(gary2.toJSON()).toStrictEqual({ id: 'gAry', topics: ['books'], pairs: [] });
     });
 
     it('POST /api/people/ should fail if user already exists', async () => {
@@ -134,19 +139,16 @@ describe('AppController (e2e)', () => {
                 [snape, ['Beatrice', 8], ['Voldemort', 6]],
                 [jinnie, ['Greg', 5], ['Ron', 8]],
             ];
+            relations.forEach(([person, ...relationData]) => {
+                person.setRelations(relationData.map(([id, trust]) => new Relation(id, trust)));
+            });
 
-            await Promise.race(
-                [gary, hermoine, ron, snape, voldemort, malfoy, jinnie, greg, beatrice].map(
-                    async (person) => await peopleRepository.addPerson(person),
-                ),
-            );
-            await Promise.race(
-                relations.map(async ([person, ...relationData]) => {
-                    return await peopleRepository.addRelations(
-                        person,
-                        relationData.map(([id, trust]) => new Relation(id, trust)),
-                    );
-                }),
+            await [gary, hermoine, ron, snape, voldemort, malfoy, jinnie, greg, beatrice].reduce(
+                async (prev: Promise<void>, person) => {
+                    await prev;
+                    await peopleRepository.addPerson(person);
+                },
+                Promise.resolve(),
             );
         });
         it('broadcast to all', async () => {
@@ -159,7 +161,7 @@ describe('AppController (e2e)', () => {
                     Hermoine: ['Greg'],
                     Greg: ['Malfoy'],
                     Malfoy: ['Snape'],
-                    Snape: ['Voldemort', 'Beatrice'],
+                    Snape: ['Beatrice', 'Voldemort'],
                     Ron: ['Jinnie'],
                 });
         });
@@ -204,7 +206,7 @@ describe('AppController (e2e)', () => {
                 })
                 .expect(201)
                 .expect({
-                    Jinnie: ['Ron', 'Greg'],
+                    Jinnie: ['Greg', 'Ron'],
                     Ron: ['Gary'],
                 });
         });
@@ -240,11 +242,11 @@ describe('AppController (e2e)', () => {
         });
     });
 
-    describe('test performance', () => {
+    describe.only('test performance', () => {
         jest.setTimeout(600000);
         it('perfomrance', async () => {
-            const persons = generateNetwork(5000, 1, ['test']);
-            await Promise.race(persons.map(async (p) => await peopleRepository.addPerson(p)));
+            const persons = generateNetwork(100, 1, ['test']);
+            await Promise.all(persons.map(async (p) => await peopleRepository.addPerson(p)));
             await request(app.getHttpServer())
                 .post('/api/messages')
                 .send({

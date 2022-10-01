@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  db:
+    image: mongo:6.0.2
+    environment:
+      - MONGODB_DATABASE="devchallenge"
+    ports:
+      - 27017:27017

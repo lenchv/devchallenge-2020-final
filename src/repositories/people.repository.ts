@@ -1,32 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Person } from '../entities/Person';
 import { Relation } from '../entities/relation';
-import { Person } from '../entities/person';
 import { Id } from '../valueObjects/id';
-import { Criteria } from './criterions/criteria';
+import { Criteria } from './criteria';
 
-@Injectable()
-export class PeopleRepository {
-    people: Person[] = [];
+export interface PeopleRepository {
+    findById(id: Id): Promise<Person | undefined>;
 
-    async findById(id: Id): Promise<Person | undefined> {
-        return this.people.find((person) => person.id.equalsTo(id));
-    }
+    addPerson(person: Person): Promise<Person>;
 
-    async addPerson(person: Person): Promise<Person> {
-        this.people.push(person);
+    addRelations(person: Person, relations: Relation[]): Promise<Person>;
 
-        return person;
-    }
+    findByCriteria<T>(criterions: Criteria<T>[]): Promise<Person[]>;
 
-    async addRelations(person: Person, relations: Relation[]): Promise<Person> {
-        person.setRelations(relations);
-
-        return person;
-    }
-
-    async findByCriteria(criterions: Criteria<Person>[]): Promise<Person[]> {
-        return criterions.reduce((people, criteria) => {
-            return criteria.query(people);
-        }, this.people);
-    }
+    wipe(): Promise<void>;
 }

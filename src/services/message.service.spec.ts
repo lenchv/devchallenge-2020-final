@@ -10,8 +10,14 @@ describe('MessageService', () => {
     let notificationService: NotificationService;
     let peopleRepository: PeopleRepository;
 
-    beforeEach(() => {
-        peopleRepository = new PeopleRepository();
+    beforeEach(async () => {
+        peopleRepository = <PeopleRepository>{
+            findById: jest.fn(),
+            findByCriteria: jest.fn(),
+            addRelations: jest.fn(),
+            addPerson: jest.fn(),
+            wipe: jest.fn(),
+        };
         notificationService = new NotificationService();
         messageService = new MessageService(peopleRepository, notificationService);
     });
