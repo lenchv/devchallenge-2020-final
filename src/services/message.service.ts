@@ -76,8 +76,6 @@ export class MessageService {
 
         const persons = [person];
         const result: MessageResponse = {};
-        let time = 0;
-        let maxTime = 0;
 
         while (persons.length) {
             const current = persons.pop();
@@ -98,7 +96,6 @@ export class MessageService {
                 new PersonCriteria(siblingsId),
                 new TopicsCriteria(topics),
             ]);
-            time = Date.now() - time;
 
             for (let i = siblings.length - 1; i >= 0; i--) {
                 persons.push(siblings[i]);
@@ -108,8 +105,6 @@ export class MessageService {
                 result[String(current.id)] = siblings.map((person) => String(person.id));
             }
         }
-
-        console.log(maxTime);
 
         return result;
     }

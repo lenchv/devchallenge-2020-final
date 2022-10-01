@@ -242,7 +242,7 @@ describe('AppController (e2e)', () => {
         });
     });
 
-    describe.only('test performance', () => {
+    describe('test performance', () => {
         jest.setTimeout(600000);
         it('perfomrance', async () => {
             const persons = generateNetwork(100, 1, ['test']);
