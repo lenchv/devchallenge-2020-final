@@ -6,6 +6,7 @@ import { PeopleRepository } from '../src/repositories/people.repository';
 import { Person } from '../src/entities/Person';
 import { Id } from '../src/valueObjects/id';
 import { Relation } from '../src/entities/relation';
+import { v4 as uuid } from 'uuid';
 
 describe('AppController (e2e)', () => {
     let app: INestApplication;
@@ -238,4 +239,41 @@ describe('AppController (e2e)', () => {
                 });
         });
     });
+
+    describe('test performance', () => {
+        jest.setTimeout(600000);
+        it('perfomrance', async () => {
+            const persons = generateNetwork(5000, 1, ['test']);
+            await Promise.race(persons.map(async (p) => await peopleRepository.addPerson(p)));
+            await request(app.getHttpServer())
+                .post('/api/messages')
+                .send({
+                    text: 'test message',
+                    topics: ['test'],
+                    from_person_id: String(persons[0].id),
+                    min_trust_level: 1,
+                })
+                .expect(201);
+        });
+    });
 });
+
+const generateNetwork = (depth: number, width: number, topics: string[]): Person[] => {
+    let i = 0;
+    const personIds = [];
+    while (i++ < depth * width) {
+        personIds.push(uuid());
+    }
+
+    const persons = personIds.map((id) => new Person(id, topics));
+
+    for (let i = 0; i < persons.length - width - 1; i += width) {
+        const relations = [];
+        for (let j = 0; j < width; j++) {
+            relations.push(new Relation(persons[i + j + 1].id, Math.ceil(((j + 1) / width) * 10)));
+        }
+        persons[i].setRelations(relations);
+    }
+
+    return persons;
+};

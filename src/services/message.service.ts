@@ -45,87 +45,64 @@ export class MessageService {
         if (!person) {
             throw new LogicException(`Person with id "${personId}" not found`, HttpStatus.NOT_FOUND);
         }
+        const visited = new Map();
+        visited.set(String(person.id), true);
 
-        return this.depthFirstTracing(
+        const response = await this.tracePeopleGraph(
             person,
             topics,
             minTrustLevel,
-            [personId],
+            visited,
             async (recipient: Person): Promise<void> => {
-                this.notificationService.send(person, recipient, text);
+                if (!recipient.id.equalsTo(person.id)) {
+                    this.notificationService.send(person, recipient, text);
+                }
             },
         );
+
+        return response;
     }
 
-    async depthFirstTracing(
+    async tracePeopleGraph(
         person: Person,
         topics: Topic[],
         minTrustLevel: Level,
-        visited: Id[],
+        visited: Map<string, boolean>,
         visit: (person: Person) => Promise<void>,
     ): Promise<MessageResponse> {
-        const isVisited = (id: Id, visited: Id[]) => visited.some((visitedId) => visitedId.equalsTo(id));
+        const isVisited = (id: Id, visited: Map<string, boolean>) => visited.has(String(id));
         const isLevelAccepted = (level, minTrustLevel: Level) => Number(level) >= Number(minTrustLevel);
 
-        const relations = person.pairs.filter(
-            (relation) => isLevelAccepted(relation.trustLevel, minTrustLevel) && !isVisited(relation.id, visited),
-        );
-        const siblingsId = relations.map((r) => r.id);
-        const newVisited = [...visited, ...siblingsId];
+        const persons = [person];
+        const result: MessageResponse = {};
 
-        if (siblingsId.length === 0) {
-            return {};
+        while (persons.length) {
+            const current = persons.shift();
+            await visit(current);
+            const relations = current.pairs.filter(
+                (relation) => isLevelAccepted(relation.trustLevel, minTrustLevel) && !isVisited(relation.id, visited),
+            );
+            const siblingsId = relations.map((r) => {
+                visited.set(String(r.id), true);
+                return r.id;
+            });
+
+            if (siblingsId.length === 0) {
+                continue;
+            }
+
+            const siblings = await this.peopleRepository.findByCriteria([
+                new PersonCriteria(siblingsId),
+                new TopicsCriteria(topics),
+            ]);
+
+            siblings.forEach((s) => persons.push(s));
+
+            if (siblings.length) {
+                result[String(current.id)] = siblings.map((person) => String(person.id));
+            }
         }
 
-        const siblings = await this.peopleRepository.findByCriteria([
-            new PersonCriteria(siblingsId),
-            new TopicsCriteria(topics),
-        ]);
-
-        if (siblings.length === 0) {
-            return {};
-        }
-
-        return siblings.reduce(
-            async (prev: Promise<MessageResponse>, person: Person): Promise<MessageResponse> => {
-                const result = await prev;
-
-                await visit(person);
-
-                return {
-                    ...result,
-                    ...(await this.depthFirstTracing(person, topics, minTrustLevel, newVisited, visit)),
-                };
-            },
-            Promise.resolve({
-                [String(person.id)]: siblings.map((person) => String(person.id)),
-            }),
-        );
-    }
-
-    async breadthFirst(relations: Relation[], topics: Topic[], minTrustLevel: Level, visited: Id[]): Promise<Person[]> {
-        const personsId = relations
-            .filter((r) => !visited.some((id) => r.id.equalsTo(id)))
-            .map((relation) => relation.id);
-
-        const isEmpty = personsId.length === 0;
-
-        if (isEmpty) {
-            return [];
-        }
-
-        const siblings = await this.peopleRepository.findByCriteria([
-            new PersonCriteria(personsId),
-            new TopicsCriteria(topics),
-        ]);
-
-        const newVisited = [...visited, ...siblings.map((p) => p.id)];
-        const nextRelations = siblings.flatMap((person) => {
-            return person.pairs.filter((relation) => Number(relation.trustLevel) >= Number(minTrustLevel));
-        });
-
-        const children = await this.breadthFirst(nextRelations, topics, minTrustLevel, newVisited);
-
-        return [...siblings, ...children];
+        return result;
     }
 }
