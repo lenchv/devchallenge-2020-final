@@ -3,6 +3,10 @@ import { Relation } from '../../entities/relation';
 import { Person } from '../../entities/person';
 import { Id } from '../../valueObjects/id';
 import { Criteria } from '../criteria';
+import { Topic } from '../../valueObjects/topic';
+import { TopicsCriteria } from './criterions/topics.criteria';
+import { Level } from '../../valueObjects/level';
+import { PersonCriteria } from './criterions/person.criteria';
 
 @Injectable()
 export class MemoryPeopleRepository {
@@ -32,6 +36,20 @@ export class MemoryPeopleRepository {
         return criterions.reduce((people, criteria) => {
             return criteria.query(people);
         }, this.people);
+    }
+
+    async queryGraphForBroadcast(topics: Topic[], minTrustLevel: Level): Promise<Person[]> {
+        return await this.findByCriteria([new TopicsCriteria(topics)]);
+    }
+
+    async getShortestPathIterator(
+        personId: Id,
+        topics: Topic[],
+        minTrustLevel: Level,
+    ): Promise<(id: []) => Promise<Person[]>> {
+        return async (ids: Id[]) => {
+            return this.findByCriteria([new PersonCriteria(ids)]);
+        };
     }
 
     async wipe(): Promise<void> {

@@ -13,6 +13,8 @@ describe('PeopleService', () => {
             addRelations: jest.fn(),
             addPerson: jest.fn(),
             addPeople: jest.fn(),
+            queryGraphForBroadcast: jest.fn(),
+            getShortestPathIterator: jest.fn(),
             wipe: jest.fn(),
         };
         peopleService = new PeopleService(peopleRepository);

@@ -15,6 +15,8 @@ describe('MessageService', () => {
             findById: jest.fn(),
             findByCriteria: jest.fn(),
             addRelations: jest.fn(),
+            queryGraphForBroadcast: jest.fn(),
+            getShortestPathIterator: jest.fn(),
             addPerson: jest.fn(),
             addPeople: jest.fn(),
             wipe: jest.fn(),
@@ -57,7 +59,7 @@ describe('MessageService', () => {
             const gary = new Person('Gary', ['books', 'magic', 'movies']);
 
             jest.spyOn(peopleRepository, 'findById').mockImplementation(async () => gary);
-            jest.spyOn(peopleRepository, 'findByCriteria').mockImplementation(async () => []);
+            jest.spyOn(peopleRepository, 'queryGraphForBroadcast').mockImplementation(async () => []);
 
             const result = await messageService.broadcastMessage({
                 text: 'hi',
@@ -77,7 +79,11 @@ describe('MessageService', () => {
             gary.setRelations([new Relation('Hermoine', 10), new Relation('Ron', 10), new Relation('Snape', 4)]);
 
             jest.spyOn(peopleRepository, 'findById').mockImplementation(async () => gary);
-            jest.spyOn(peopleRepository, 'findByCriteria').mockImplementation(async () => [gary, hermoine, ron]);
+            jest.spyOn(peopleRepository, 'queryGraphForBroadcast').mockImplementation(async () => [
+                gary,
+                hermoine,
+                ron,
+            ]);
 
             const result = await messageService.broadcastMessage({
                 text: 'hi',
@@ -101,7 +107,11 @@ describe('MessageService', () => {
             ron.setRelations([new Relation('Gary', 10)]);
 
             jest.spyOn(peopleRepository, 'findById').mockImplementation(async () => gary);
-            jest.spyOn(peopleRepository, 'findByCriteria').mockImplementation(async () => [gary, hermoine, ron]);
+            jest.spyOn(peopleRepository, 'queryGraphForBroadcast').mockImplementation(async () => [
+                gary,
+                hermoine,
+                ron,
+            ]);
 
             const result = await messageService.broadcastMessage({
                 text: 'hi',
@@ -126,7 +136,7 @@ describe('MessageService', () => {
             ron.setRelations([new Relation('Gary', 10), new Relation('Jinnie', 10)]);
 
             jest.spyOn(peopleRepository, 'findById').mockImplementation(async () => gary);
-            jest.spyOn(peopleRepository, 'findByCriteria').mockImplementation(async () => [
+            jest.spyOn(peopleRepository, 'queryGraphForBroadcast').mockImplementation(async () => [
                 gary,
                 hermoine,
                 ron,

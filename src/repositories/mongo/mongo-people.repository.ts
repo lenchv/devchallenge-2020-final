@@ -7,11 +7,13 @@ import { Person as PersonModel, PersonDocument } from '../../models/person.model
 import { Id } from '../../valueObjects/id';
 import { Criteria } from '../criteria';
 import { PeopleRepository } from '../people.repository';
+import { TopicsCriteria } from './criterions/topics.criteria';
+import { Topic } from '../../valueObjects/topic';
+import { Level } from '../../valueObjects/level';
+import { PersonCriteria } from './criterions/person.criteria';
 
 @Injectable()
 export class MongoPeopleRepository implements PeopleRepository {
-    people: Person[] = [];
-
     constructor(@InjectModel(PersonModel.name) private readonly personModel: Model<PersonDocument>) {}
 
     async findById(id: Id): Promise<Person | undefined> {
@@ -60,6 +62,20 @@ export class MongoPeopleRepository implements PeopleRepository {
 
             return person;
         });
+    }
+
+    async queryGraphForBroadcast(topics: Topic[], minTrustLevel: Level): Promise<Person[]> {
+        return await this.findByCriteria([new TopicsCriteria(topics)]);
+    }
+
+    async getShortestPathIterator(
+        personId: Id,
+        topics: Topic[],
+        minTrustLevel: Level,
+    ): Promise<(id: []) => Promise<Person[]>> {
+        return async (ids: Id[]) => {
+            return this.findByCriteria([new PersonCriteria(ids)]);
+        };
     }
 
     async wipe() {

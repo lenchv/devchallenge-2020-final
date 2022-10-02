@@ -1,3 +1,5 @@
+import { Level } from '../valueObjects/level';
+import { Topic } from '../valueObjects/topic';
 import { Person } from '../entities/Person';
 import { Relation } from '../entities/relation';
 import { Id } from '../valueObjects/id';
@@ -12,7 +14,15 @@ export interface PeopleRepository {
 
     addRelations(person: Person, relations: Relation[]): Promise<Person>;
 
-    findByCriteria<T>(criterions: Criteria<T>[]): Promise<Person[]>;
+    findByCriteria(criterions: Criteria<any>[]): Promise<Person[]>;
+
+    queryGraphForBroadcast(topics: Topic[], minTrustLevel: Level): Promise<Person[]>;
+
+    getShortestPathIterator(
+        personId: Id,
+        topics: Topic[],
+        minTrustLevel: Level,
+    ): Promise<(id: []) => Promise<Person[]>>;
 
     wipe(): Promise<void>;
 }

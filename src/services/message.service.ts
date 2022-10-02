@@ -5,21 +5,11 @@ import { BroadcastMessage } from '../dto/broadcast-message.dto';
 import { MessageResponse } from '../dto/message-response.dto';
 import { Level } from '../valueObjects/level';
 import { Id } from '../valueObjects/id';
-import { PersonCriteria } from '../repositories/mongo/criterions/person.criteria';
-import { TopicsCriteria } from '../repositories/mongo/criterions/topics.criteria';
 import { Person } from '../entities/Person';
 import { NotificationService } from './notification.service';
 import { LogicException } from '../exceptions/logic.exception';
 import { Queue } from '@datastructures-js/queue';
 import { ShortPathResponse } from '../dto/short-path-response.dto';
-import { MemoryPeopleRepository } from '../repositories/memory/memory-people.repository';
-
-type MessageData = {
-    text: string;
-    topics: Topic[];
-    personId: Id;
-    minTrustLevel: Level;
-};
 
 @Injectable()
 export class MessageService {
@@ -28,7 +18,12 @@ export class MessageService {
         private readonly notificationService: NotificationService,
     ) {}
 
-    private getMessageData(message: BroadcastMessage): MessageData {
+    private getMessageData(message: BroadcastMessage): {
+        text: string;
+        topics: Topic[];
+        personId: Id;
+        minTrustLevel: Level;
+    } {
         if (!message.text) {
             throw new LogicException('Message text cannot be empty');
         }
@@ -61,7 +56,7 @@ export class MessageService {
             throw new LogicException(`Person with id "${personId}" not found`, HttpStatus.NOT_FOUND);
         }
 
-        const people = await this.peopleRepository.findByCriteria([new TopicsCriteria(topics)]);
+        const people = await this.peopleRepository.queryGraphForBroadcast(topics, minTrustLevel);
         const peopleMap: Map<string, Person> = people.reduce((result, person) => {
             result.set(String(person.id), person);
             return result;
@@ -87,15 +82,11 @@ export class MessageService {
 
     async findShortestPath(message: BroadcastMessage): Promise<ShortPathResponse> {
         const { topics, personId, minTrustLevel } = this.getMessageData(message);
-        const person = await this.peopleRepository.findById(personId);
-
-        if (!person) {
-            throw new LogicException(`Person with id "${personId}" not found`, HttpStatus.NOT_FOUND);
-        }
+        const personIterator = await this.peopleRepository.getShortestPathIterator(personId, topics, minTrustLevel);
         const visited = new Map();
-        visited.set(String(person.id), true);
+        visited.set(String(personId), true);
 
-        const path = await this.traversePeopleGraphInBreadth(person, topics, minTrustLevel, visited);
+        const path = await this.traversePeopleGraphInBreadth(personId, personIterator, topics, minTrustLevel, visited);
 
         return {
             from: String(personId),
@@ -146,7 +137,8 @@ export class MessageService {
     }
 
     async traversePeopleGraphInBreadth(
-        person: Person,
+        root: Id,
+        personIterator: (ids: Id[]) => Promise<Person[]>,
         topics: Topic[],
         minTrustLevel: Level,
         visited: Map<string, boolean>,
@@ -158,8 +150,14 @@ export class MessageService {
         const getPath = (resultMap: Map<string, Id>, root: Id, id?: Id): Id[] =>
             id.equalsTo(root) ? [] : [...getPath(resultMap, root, resultMap.get(String(id))), id];
 
+        const person = await personIterator([root]);
+
+        if (person.length === 0) {
+            throw new LogicException(`Person with id "${root}" not found`, HttpStatus.NOT_FOUND);
+        }
+
         const persons = new Queue<Person>();
-        persons.enqueue(person);
+        persons.enqueue(person[0]);
         const result: Map<string, Id> = new Map();
 
         while (persons.size()) {
@@ -177,7 +175,7 @@ export class MessageService {
                 continue;
             }
 
-            const siblings = await this.peopleRepository.findByCriteria([new PersonCriteria(siblingsId)]);
+            const siblings = await personIterator(siblingsId);
 
             for (let i = 0; i < siblings.length; i++) {
                 const sibling = siblings[i];
@@ -185,7 +183,7 @@ export class MessageService {
                 result.set(String(sibling.id), current.id);
 
                 if (areTopicsAccepted(sibling, topics)) {
-                    return getPath(result, person.id, sibling.id);
+                    return getPath(result, root, sibling.id);
                 }
 
                 persons.enqueue(sibling);

@@ -35,6 +35,6 @@ export class PeopleService {
 
         const relations = Object.entries(pairs).map(([personId, trustLevel]) => new Relation(personId, trustLevel));
 
-        this.peopleRepository.addRelations(person, relations);
+        await this.peopleRepository.addRelations(person, relations);
     }
 }

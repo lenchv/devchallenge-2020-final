@@ -6,7 +6,8 @@ import { PeopleRepository } from '../src/repositories/people.repository';
 import { Person } from '../src/entities/Person';
 import { Id } from '../src/valueObjects/id';
 import { Relation } from '../src/entities/relation';
-import { v4 as uuid } from 'uuid';
+import { generateNetwork } from './helpers/generateNetwork';
+import { saveToCsvForNeo4j } from './helpers/saveToCsvForNeo4j';
 
 describe('AppController (e2e)', () => {
     let app: INestApplication;
@@ -90,7 +91,12 @@ describe('AppController (e2e)', () => {
     });
 
     it('POST /api/people/<id>/trust_connections success update', async () => {
-        await peopleRepository.addPerson(new Person('Gary', ['books', 'magic']));
+        await peopleRepository.addPeople([
+            new Person('Gary', ['books', 'magic']),
+            new Person('Hermoine', ['books', 'magic']),
+            new Person('Ron', ['books', 'magic']),
+            new Person('Snape', ['books', 'magic']),
+        ]);
 
         await request(app.getHttpServer())
             .post('/api/people/Gary/trust_connections')
@@ -142,7 +148,6 @@ describe('AppController (e2e)', () => {
             relations.forEach(([person, ...relationData]) => {
                 person.setRelations(relationData.map(([id, trust]) => new Relation(id, trust)));
             });
-
             await peopleRepository.addPeople([gary, hermoine, ron, snape, voldemort, malfoy, jinnie, greg, beatrice]);
         });
         it('broadcast to all', async () => {
@@ -152,11 +157,11 @@ describe('AppController (e2e)', () => {
                 .expect(201)
                 .expect({
                     Gary: ['Hermoine', 'Ron'],
+                    Ron: ['Jinnie'],
                     Hermoine: ['Greg'],
                     Greg: ['Malfoy'],
                     Malfoy: ['Snape'],
                     Snape: ['Beatrice', 'Voldemort'],
-                    Ron: ['Jinnie'],
                 });
         });
 
@@ -314,7 +319,8 @@ describe('AppController (e2e)', () => {
     describe('test performance', () => {
         jest.setTimeout(600000);
         it('perfomrance', async () => {
-            const persons = generateNetwork(500, 3, ['test']);
+            const persons = generateNetwork(100, 1, ['test']);
+            //await saveToCsvForNeo4j(persons);
             await peopleRepository.addPeople(persons);
             await request(app.getHttpServer())
                 .post('/api/messages')
@@ -328,23 +334,3 @@ describe('AppController (e2e)', () => {
         });
     });
 });
-
-const generateNetwork = (depth: number, width: number, topics: string[]): Person[] => {
-    let i = 0;
-    const personIds = [];
-    while (i++ < depth * width) {
-        personIds.push(uuid());
-    }
-
-    const persons = personIds.map((id) => new Person(id, topics));
-
-    for (let i = 0; i < persons.length - width - 1; i += width) {
-        const relations = [];
-        for (let j = 0; j < width; j++) {
-            relations.push(new Relation(persons[i + j + 1].id, Math.ceil(((j + 1) / width) * 10)));
-        }
-        persons[i].setRelations(relations);
-    }
-
-    return persons;
-};
