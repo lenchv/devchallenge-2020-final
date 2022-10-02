@@ -1,5 +1,5 @@
 import { BroadcastMessage } from '../dto/broadcast-message.dto';
-import { Person } from '../entities/Person';
+import { Person } from '../entities/person';
 import { Relation } from '../entities/relation';
 import { PeopleRepository } from '../repositories/people.repository';
 import { MessageService } from './message.service';

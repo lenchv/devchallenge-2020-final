@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  db:
+  mongo:
     image: mongo:6.0.2
     environment:
       - MONGODB_DATABASE="devchallenge"
@@ -16,3 +16,17 @@ services:
       - 7687:7687
     volumes:
       - "./.neo4j_scripts:/var/lib/neo4j/import/neo4j_scripts/"
+  server:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    depends_on:
+      - "mongo"
+      - "neo4j"
+    ports:
+      - 8080:8080
+  node:
+    image: node:16.14.2
+    working_dir: /app
+    volumes:
+      - "./:/app"

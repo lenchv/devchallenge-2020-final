@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PeopleRepository } from '../src/repositories/people.repository';
-import { Person } from '../src/entities/Person';
+import { Person } from '../src/entities/person';
 import { Id } from '../src/valueObjects/id';
 import { Relation } from '../src/entities/relation';
 import { generateNetwork } from './helpers/generateNetwork';

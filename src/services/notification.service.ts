@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Person } from '../entities/Person';
+import { Person } from '../entities/person';
 
 @Injectable()
 export class NotificationService {

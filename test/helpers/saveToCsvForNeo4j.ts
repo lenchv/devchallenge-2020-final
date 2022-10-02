@@ -1,6 +1,6 @@
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
-import { Person } from '../../src/entities/Person';
+import { Person } from '../../src/entities/person';
 
 export const saveToCsvForNeo4j = async (people: Person[]): Promise<void> => {
     const peopleLines = people.map((person) => {

@@ -5,7 +5,7 @@ import { BroadcastMessage } from '../dto/broadcast-message.dto';
 import { MessageResponse } from '../dto/message-response.dto';
 import { Level } from '../valueObjects/level';
 import { Id } from '../valueObjects/id';
-import { Person } from '../entities/Person';
+import { Person } from '../entities/person';
 import { NotificationService } from './notification.service';
 import { LogicException } from '../exceptions/logic.exception';
 import { Queue } from '@datastructures-js/queue';

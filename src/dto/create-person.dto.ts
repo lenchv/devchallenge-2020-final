@@ -1,4 +1,4 @@
-import { Person } from '../entities/Person';
+import { Person } from '../entities/person';
 
 export class CreatePersonDto {
     id: string;

@@ -19,7 +19,7 @@ describe('PeopleService', () => {
         };
         peopleService = new PeopleService(peopleRepository);
 
-        jest.spyOn(peopleRepository, 'addPerson').mockImplementation((person) => Promise.resolve(person));
+        jest.spyOn(peopleRepository, 'addPerson').mockImplementation(async (person) => person);
         jest.spyOn(peopleRepository, 'addRelations').mockImplementation((p, relations) => {
             p.setRelations(relations);
             return Promise.resolve(p);
@@ -55,7 +55,7 @@ describe('PeopleService', () => {
     describe('addTrustConnections', () => {
         it('should add relations', async () => {
             const p = new Person('Gary', ['books', 'magic']);
-            jest.spyOn(peopleRepository, 'findById').mockImplementation(() => Promise.resolve(p));
+            jest.spyOn(peopleRepository, 'findById').mockImplementation(async (): Promise<Person> => p);
 
             await peopleService.addTrustConnections('Gary', {
                 Voldemort: 1,
@@ -70,7 +70,7 @@ describe('PeopleService', () => {
 
         it('should update relations', async () => {
             const p = new Person('Gary', ['books', 'magic']);
-            jest.spyOn(peopleRepository, 'findById').mockImplementation(() => Promise.resolve(p));
+            jest.spyOn(peopleRepository, 'findById').mockImplementation(async (): Promise<Person> => p);
 
             await peopleService.addTrustConnections('Gary', {
                 Voldemort: 1,
@@ -110,7 +110,7 @@ describe('PeopleService', () => {
 
         it('should throw error if relations are invalid', async () => {
             const p = new Person('Gary', ['books', 'magic']);
-            jest.spyOn(peopleRepository, 'findById').mockImplementation(() => Promise.resolve(p));
+            jest.spyOn(peopleRepository, 'findById').mockImplementation(async (): Promise<Person> => p);
             await Promise.all(
                 [-1, 10].map(async (level) => {
                     try {

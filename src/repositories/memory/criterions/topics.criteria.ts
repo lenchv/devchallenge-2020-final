@@ -1,5 +1,5 @@
 import { Topic } from '../../../valueObjects/topic';
-import { Person } from '../../../entities/Person';
+import { Person } from '../../../entities/person';
 import { Criteria } from '../../criteria';
 
 export class TopicsCriteria implements Criteria<Person[]> {

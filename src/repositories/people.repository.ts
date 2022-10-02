@@ -1,6 +1,6 @@
 import { Level } from '../valueObjects/level';
 import { Topic } from '../valueObjects/topic';
-import { Person } from '../entities/Person';
+import { Person } from '../entities/person';
 import { Relation } from '../entities/relation';
 import { Id } from '../valueObjects/id';
 import { Criteria } from './criteria';

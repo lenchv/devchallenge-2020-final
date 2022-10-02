@@ -1,4 +1,4 @@
-import { Person } from '../../src/entities/Person';
+import { Person } from '../../src/entities/person';
 import { v4 as uuid } from 'uuid';
 import { Relation } from '../../src/entities/relation';
 

@@ -3,7 +3,7 @@ import { TrustConnectionPairDto } from '../dto/trust-connection-pair.dto';
 import { Relation } from '../entities/relation';
 import { LogicException } from '../exceptions/logic.exception';
 import { CreatePersonDto } from '../dto/create-person.dto';
-import { Person } from '../entities/Person';
+import { Person } from '../entities/person';
 import { PeopleRepository } from '../repositories/people.repository';
 import { Id } from '../valueObjects/id';
 
