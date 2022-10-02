@@ -12,6 +12,7 @@ describe('PeopleService', () => {
             findByCriteria: jest.fn(),
             addRelations: jest.fn(),
             addPerson: jest.fn(),
+            addPeople: jest.fn(),
             wipe: jest.fn(),
         };
         peopleService = new PeopleService(peopleRepository);

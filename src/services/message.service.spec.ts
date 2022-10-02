@@ -16,6 +16,7 @@ describe('MessageService', () => {
             findByCriteria: jest.fn(),
             addRelations: jest.fn(),
             addPerson: jest.fn(),
+            addPeople: jest.fn(),
             wipe: jest.fn(),
         };
         notificationService = new NotificationService();
@@ -73,18 +74,10 @@ describe('MessageService', () => {
             const hermoine = new Person('Hermoine', ['books', 'magic']);
             const ron = new Person('Ron', ['movies', 'magic']);
 
-            gary.setRelations([new Relation('Ron', 10), new Relation('Hermoine', 10), new Relation('Snape', 4)]);
+            gary.setRelations([new Relation('Hermoine', 10), new Relation('Ron', 10), new Relation('Snape', 4)]);
 
-            let criteriaCallsCount = 0;
             jest.spyOn(peopleRepository, 'findById').mockImplementation(async () => gary);
-            jest.spyOn(peopleRepository, 'findByCriteria').mockImplementation(async () => {
-                if (criteriaCallsCount === 0) {
-                    criteriaCallsCount++;
-                    return [hermoine, ron];
-                } else {
-                    return [];
-                }
-            });
+            jest.spyOn(peopleRepository, 'findByCriteria').mockImplementation(async () => [gary, hermoine, ron]);
 
             const result = await messageService.broadcastMessage({
                 text: 'hi',
@@ -103,20 +96,12 @@ describe('MessageService', () => {
             const hermoine = new Person('Hermoine', ['books', 'magic']);
             const ron = new Person('Ron', ['movies', 'magic']);
 
-            gary.setRelations([new Relation('Ron', 10), new Relation('Hermoine', 10)]);
+            gary.setRelations([new Relation('Hermoine', 10), new Relation('Ron', 10)]);
             hermoine.setRelations([new Relation('Ron', 10)]);
             ron.setRelations([new Relation('Gary', 10)]);
 
-            let criteriaCallsCount = 0;
             jest.spyOn(peopleRepository, 'findById').mockImplementation(async () => gary);
-            jest.spyOn(peopleRepository, 'findByCriteria').mockImplementation(async () => {
-                if (criteriaCallsCount === 0) {
-                    criteriaCallsCount++;
-                    return [hermoine, ron];
-                } else {
-                    return [];
-                }
-            });
+            jest.spyOn(peopleRepository, 'findByCriteria').mockImplementation(async () => [gary, hermoine, ron]);
 
             const result = await messageService.broadcastMessage({
                 text: 'hi',
@@ -140,19 +125,13 @@ describe('MessageService', () => {
             hermoine.setRelations([new Relation('Ron', 10)]);
             ron.setRelations([new Relation('Gary', 10), new Relation('Jinnie', 10)]);
 
-            let criteriaCallsCount = 0;
             jest.spyOn(peopleRepository, 'findById').mockImplementation(async () => gary);
-            jest.spyOn(peopleRepository, 'findByCriteria').mockImplementation(async () => {
-                if (criteriaCallsCount === 0) {
-                    criteriaCallsCount++;
-                    return [hermoine, ron];
-                } else if (criteriaCallsCount === 1) {
-                    criteriaCallsCount++;
-                    return [jinnie];
-                } else {
-                    return [];
-                }
-            });
+            jest.spyOn(peopleRepository, 'findByCriteria').mockImplementation(async () => [
+                gary,
+                hermoine,
+                ron,
+                jinnie,
+            ]);
 
             const result = await messageService.broadcastMessage({
                 text: 'hi',

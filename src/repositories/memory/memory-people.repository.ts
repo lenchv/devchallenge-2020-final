@@ -18,6 +18,10 @@ export class MemoryPeopleRepository {
         return person;
     }
 
+    async addPeople(people: Person[]): Promise<void> {
+        this.people = this.people.concat(people);
+    }
+
     async addRelations(person: Person, relations: Relation[]): Promise<Person> {
         person.setRelations(relations);
 

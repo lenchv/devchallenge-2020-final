@@ -8,6 +8,8 @@ export interface PeopleRepository {
 
     addPerson(person: Person): Promise<Person>;
 
+    addPeople(people: Person[]): Promise<void>;
+
     addRelations(person: Person, relations: Relation[]): Promise<Person>;
 
     findByCriteria<T>(criterions: Criteria<T>[]): Promise<Person[]>;

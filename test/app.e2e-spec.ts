@@ -143,13 +143,7 @@ describe('AppController (e2e)', () => {
                 person.setRelations(relationData.map(([id, trust]) => new Relation(id, trust)));
             });
 
-            await [gary, hermoine, ron, snape, voldemort, malfoy, jinnie, greg, beatrice].reduce(
-                async (prev: Promise<void>, person) => {
-                    await prev;
-                    await peopleRepository.addPerson(person);
-                },
-                Promise.resolve(),
-            );
+            await peopleRepository.addPeople([gary, hermoine, ron, snape, voldemort, malfoy, jinnie, greg, beatrice]);
         });
         it('broadcast to all', async () => {
             await request(app.getHttpServer())
@@ -266,13 +260,7 @@ describe('AppController (e2e)', () => {
                 person.setRelations(relationData.map(([id, trust]) => new Relation(id, trust)));
             });
 
-            await [gary, hermoine, ron, snape, voldemort, malfoy, jinnie, greg, beatrice].reduce(
-                async (prev: Promise<void>, person) => {
-                    await prev;
-                    await peopleRepository.addPerson(person);
-                },
-                Promise.resolve(),
-            );
+            await peopleRepository.addPeople([gary, hermoine, ron, snape, voldemort, malfoy, jinnie, greg, beatrice]);
         });
         it('find who can brew poison among evil ones', async () => {
             await request(app.getHttpServer())
@@ -326,8 +314,8 @@ describe('AppController (e2e)', () => {
     describe('test performance', () => {
         jest.setTimeout(600000);
         it('perfomrance', async () => {
-            const persons = generateNetwork(100, 1, ['test']);
-            await Promise.all(persons.map(async (p) => await peopleRepository.addPerson(p)));
+            const persons = generateNetwork(500, 3, ['test']);
+            await peopleRepository.addPeople(persons);
             await request(app.getHttpServer())
                 .post('/api/messages')
                 .send({

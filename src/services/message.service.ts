@@ -7,13 +7,12 @@ import { Level } from '../valueObjects/level';
 import { Id } from '../valueObjects/id';
 import { PersonCriteria } from '../repositories/mongo/criterions/person.criteria';
 import { TopicsCriteria } from '../repositories/mongo/criterions/topics.criteria';
-// import { PersonCriteria } from '../repositories/memory/criterions/person.criteria';
-// import { TopicsCriteria } from '../repositories/memory/criterions/topics.criteria';
 import { Person } from '../entities/Person';
 import { NotificationService } from './notification.service';
 import { LogicException } from '../exceptions/logic.exception';
 import { Queue } from '@datastructures-js/queue';
 import { ShortPathResponse } from '../dto/short-path-response.dto';
+import { MemoryPeopleRepository } from '../repositories/memory/memory-people.repository';
 
 type MessageData = {
     text: string;
@@ -61,12 +60,19 @@ export class MessageService {
         if (!person) {
             throw new LogicException(`Person with id "${personId}" not found`, HttpStatus.NOT_FOUND);
         }
+
+        const people = await this.peopleRepository.findByCriteria([new TopicsCriteria(topics)]);
+        const peopleMap: Map<string, Person> = people.reduce((result, person) => {
+            result.set(String(person.id), person);
+            return result;
+        }, new Map());
+
         const visited = new Map();
         visited.set(String(person.id), true);
 
         const response = await this.traversePeopleGraphInDepth(
             person,
-            topics,
+            peopleMap,
             minTrustLevel,
             visited,
             async (recipient: Person): Promise<void> => {
@@ -99,7 +105,7 @@ export class MessageService {
 
     async traversePeopleGraphInDepth(
         person: Person,
-        topics: Topic[],
+        people: Map<string, Person>,
         minTrustLevel: Level,
         visited: Map<string, boolean>,
         visit: (person: Person) => Promise<void>,
@@ -125,10 +131,7 @@ export class MessageService {
                 continue;
             }
 
-            const siblings = await this.peopleRepository.findByCriteria([
-                new PersonCriteria(siblingsId),
-                new TopicsCriteria(topics),
-            ]);
+            const siblings = siblingsId.map((id) => people.get(String(id))).filter(Boolean);
 
             for (let i = siblings.length - 1; i >= 0; i--) {
                 persons.push(siblings[i]);
