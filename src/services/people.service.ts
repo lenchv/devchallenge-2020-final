@@ -16,10 +16,10 @@ export class PeopleService {
         const existedPerson = await this.peopleRepository.findById(person.id);
 
         if (existedPerson) {
-            throw new LogicException(`User "${personData.id}" already exists`);
+            return await this.peopleRepository.updatePerson(person);
+        } else {
+            return await this.peopleRepository.addPerson(person);
         }
-
-        return await this.peopleRepository.addPerson(person);
     }
 
     async addTrustConnections(personId: string, pairs: TrustConnectionPairDto): Promise<void> {

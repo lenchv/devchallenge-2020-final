@@ -18,6 +18,7 @@ describe('MessageService', () => {
             queryGraphForBroadcast: jest.fn(),
             getShortestPathIterator: jest.fn(),
             addPerson: jest.fn(),
+            updatePerson: jest.fn(),
             addPeople: jest.fn(),
             wipe: jest.fn(),
         };
@@ -33,7 +34,6 @@ describe('MessageService', () => {
                     { text: 'text', from_person_id: '', min_trust_level: 12, topics: null },
                     'Topics must be an array of strings',
                 ],
-                [{ text: 'text', from_person_id: '', min_trust_level: 12, topics: [] }, 'Topics cannot be empty'],
                 [
                     { text: 'text', from_person_id: 'Gary', min_trust_level: 12, topics: ['magic'] },
                     'Level must be greater than 0 and not higher 10',

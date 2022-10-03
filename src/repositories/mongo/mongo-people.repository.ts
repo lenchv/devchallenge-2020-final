@@ -37,6 +37,17 @@ export class MongoPeopleRepository implements PeopleRepository {
         return person;
     }
 
+    async updatePerson(person: Person): Promise<Person> {
+        const model = await this.personModel.findOneAndUpdate(
+            { id: String(person.id) },
+            { topics: person.topics.map(String) },
+        );
+
+        await model.save();
+
+        return person;
+    }
+
     async addPeople(people: Person[]): Promise<void> {
         await this.personModel.collection.insertMany(people.map((person) => new this.personModel(person.toJSON())));
     }

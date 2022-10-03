@@ -12,6 +12,7 @@ describe('PeopleService', () => {
             findByCriteria: jest.fn(),
             addRelations: jest.fn(),
             addPerson: jest.fn(),
+            updatePerson: jest.fn(),
             addPeople: jest.fn(),
             queryGraphForBroadcast: jest.fn(),
             getShortestPathIterator: jest.fn(),

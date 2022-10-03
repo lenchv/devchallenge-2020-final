@@ -22,6 +22,14 @@ export class MemoryPeopleRepository {
         return person;
     }
 
+    async updatePerson(person: Person): Promise<Person> {
+        const p = await this.findById(person.id);
+
+        p.setTopics(person.topics.map(String));
+
+        return p;
+    }
+
     async addPeople(people: Person[]): Promise<void> {
         this.people = this.people.concat(people);
     }

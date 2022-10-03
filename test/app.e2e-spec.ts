@@ -69,16 +69,18 @@ describe('AppController (e2e)', () => {
         expect(gary2.toJSON()).toStrictEqual({ id: 'gAry', topics: ['books'], pairs: [] });
     });
 
-    it('POST /api/people/ should fail if user already exists', async () => {
+    it('POST /api/people/ should update existed user', async () => {
         await request(app.getHttpServer())
             .post('/api/people')
             .send({ id: 'Gary', topics: ['books'] })
             .expect(201);
         await request(app.getHttpServer())
             .post('/api/people')
-            .send({ id: 'Gary', topics: ['books'] })
-            .expect(422)
-            .expect({ message: 'User "Gary" already exists' });
+            .send({ id: 'Gary', topics: ['books', 'magic'] })
+            .expect(201);
+
+        const gary = await peopleRepository.findById(new Id('Gary'));
+        expect(gary.toJSON().topics).toStrictEqual(['books', 'magic']);
     });
 
     it('POST /api/people/<id>/trust_connections success adding', async () => {
@@ -153,7 +155,7 @@ describe('AppController (e2e)', () => {
         it('broadcast to all', async () => {
             await request(app.getHttpServer())
                 .post('/api/messages')
-                .send({ text: 'Voldemort is alive', topics: ['magic'], from_person_id: 'Gary', min_trust_level: 6 })
+                .send({ text: 'Voldemort is alive', topics: [], from_person_id: 'Gary', min_trust_level: 6 })
                 .expect(201)
                 .expect({
                     Gary: ['Hermoine', 'Ron'],

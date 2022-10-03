@@ -18,36 +18,6 @@ export class MessageService {
         private readonly notificationService: NotificationService,
     ) {}
 
-    private getMessageData(message: BroadcastMessage): {
-        text: string;
-        topics: Topic[];
-        personId: Id;
-        minTrustLevel: Level;
-    } {
-        if (!message.text) {
-            throw new LogicException('Message text cannot be empty');
-        }
-
-        if (typeof message.text !== 'string') {
-            throw new LogicException('Message text must be string');
-        }
-
-        if (!Array.isArray(message.topics)) {
-            throw new LogicException('Topics must be an array of strings');
-        }
-
-        if (message.topics.length === 0) {
-            throw new LogicException('Topics cannot be empty');
-        }
-
-        const text: string = message.text;
-        const topics: Topic[] = message.topics.map((topic) => new Topic(topic));
-        const personId = new Id(message.from_person_id);
-        const minTrustLevel = new Level(message.min_trust_level);
-
-        return { text, topics, personId, minTrustLevel };
-    }
-
     async broadcastMessage(message: BroadcastMessage): Promise<MessageResponse> {
         const { text, topics, personId, minTrustLevel } = this.getMessageData(message);
         const person = await this.peopleRepository.findById(personId);
@@ -82,6 +52,11 @@ export class MessageService {
 
     async findShortestPath(message: BroadcastMessage): Promise<ShortPathResponse> {
         const { topics, personId, minTrustLevel } = this.getMessageData(message);
+
+        if (topics.length === 0) {
+            throw new LogicException('topics cannot be empty');
+        }
+
         const personIterator = await this.peopleRepository.getShortestPathIterator(personId, topics, minTrustLevel);
         const visited = new Map();
         visited.set(String(personId), true);
@@ -94,7 +69,33 @@ export class MessageService {
         };
     }
 
-    async traversePeopleGraphInDepth(
+    private getMessageData(message: BroadcastMessage): {
+        text: string;
+        topics: Topic[];
+        personId: Id;
+        minTrustLevel: Level;
+    } {
+        if (!message.text) {
+            throw new LogicException('Message text cannot be empty');
+        }
+
+        if (typeof message.text !== 'string') {
+            throw new LogicException('Message text must be string');
+        }
+
+        if (!Array.isArray(message.topics)) {
+            throw new LogicException('Topics must be an array of strings');
+        }
+
+        const text: string = message.text;
+        const topics: Topic[] = message.topics.map((topic) => new Topic(topic));
+        const personId = new Id(message.from_person_id);
+        const minTrustLevel = new Level(message.min_trust_level);
+
+        return { text, topics, personId, minTrustLevel };
+    }
+
+    private async traversePeopleGraphInDepth(
         person: Person,
         people: Map<string, Person>,
         minTrustLevel: Level,
@@ -136,7 +137,7 @@ export class MessageService {
         return result;
     }
 
-    async traversePeopleGraphInBreadth(
+    private async traversePeopleGraphInBreadth(
         root: Id,
         personIterator: (ids: Id[]) => Promise<Person[]>,
         topics: Topic[],
