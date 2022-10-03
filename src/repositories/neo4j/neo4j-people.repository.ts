@@ -47,6 +47,14 @@ export class Neo4jPeopleRepository implements PeopleRepository {
         return person;
     }
 
+    async updatePerson(person: Person): Promise<Person> {
+        await this.neo4jService.write(
+            `MATCH (p:Person { id: "${person.id}" }) SET p.topics=["${person.topics.join('", "')}"] RETURN p`,
+        );
+
+        return person;
+    }
+
     async addPeople(people: Person[]): Promise<void> {
         await people.reduce(async (prev, person): Promise<void> => {
             await prev;
@@ -76,7 +84,10 @@ export class Neo4jPeopleRepository implements PeopleRepository {
     }
 
     async findByCriteria(criterions: Criteria<string>[]): Promise<Person[]> {
-        const filter = criterions.map((criteria) => criteria.query('')).join(' AND ');
+        const filter = criterions
+            .map((criteria) => criteria.query(''))
+            .filter(Boolean)
+            .join(' AND ');
         const query = `
             MATCH (n:Person)-[r:TRUSTS]->(m)
             WHERE ${filter}
