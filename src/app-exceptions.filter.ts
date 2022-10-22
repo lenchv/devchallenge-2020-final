@@ -1,7 +1,8 @@
 import { HttpStatus } from '@nestjs/common';
 import { ExceptionFilter, Catch, ArgumentsHost } from '@nestjs/common';
 import { Response } from 'express';
-import { LogicException } from './exceptions/logic.exception';
+import { AppException } from './exceptions/app.exception';
+import { NotFoundException } from './exceptions/not-found.exception';
 
 @Catch()
 export class AppExceptionsFilter implements ExceptionFilter {
@@ -9,8 +10,14 @@ export class AppExceptionsFilter implements ExceptionFilter {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse<Response>();
 
-        if (exception instanceof LogicException) {
-            response.status(exception.httpStatus).json({
+        console.error(exception);
+
+        if (exception instanceof AppException) {
+            response.status(HttpStatus.UNPROCESSABLE_ENTITY).json({
+                message: exception.message,
+            });
+        } else if (exception instanceof NotFoundException) {
+            response.status(HttpStatus.NOT_FOUND).json({
                 message: exception.message,
             });
         } else {

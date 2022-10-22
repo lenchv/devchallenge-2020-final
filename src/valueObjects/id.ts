@@ -1,4 +1,4 @@
-import { LogicException } from '../exceptions/logic.exception';
+import { AppException } from '../exceptions/app.exception';
 
 export class Id {
     public readonly id: string;
@@ -10,17 +10,21 @@ export class Id {
         }
 
         if (!id) {
-            throw new LogicException('id cannot be empty');
+            throw new AppException('id cannot be empty');
         }
 
         if (typeof id === 'object') {
-            throw new LogicException('id should have simple type: string, number');
+            throw new AppException('id should have simple type: string, number');
         }
 
         this.id = String(id);
     }
 
     toString(): string {
+        return this.id;
+    }
+
+    valueOf(): string {
         return this.id;
     }
 
