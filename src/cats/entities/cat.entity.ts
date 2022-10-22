@@ -1,4 +1,4 @@
-import { Id } from 'src/valueObjects/id';
+import { Id } from 'src/common/valueObjects/id';
 
 export class Cat {
     constructor(public readonly id: Id, public readonly name: string) {}

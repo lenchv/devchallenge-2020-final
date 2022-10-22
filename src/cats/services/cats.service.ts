@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Id } from 'src/valueObjects/id';
+import { Id } from 'src/common/valueObjects/id';
 import { CatDto } from '../dto/cat.dto';
 import { Cat } from '../entities/cat.entity';
 import { CatsRepository } from '../repositories/cats.repository';
 import { v4 as uuid } from 'uuid';
-import { NotFoundException } from 'src/exceptions/not-found.exception';
+import { NotFoundException } from 'src/common/exceptions/not-found.exception';
 
 @Injectable()
 export class CatsService {

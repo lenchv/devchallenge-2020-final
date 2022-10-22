@@ -1,8 +1,8 @@
 import { HttpStatus } from '@nestjs/common';
 import { ExceptionFilter, Catch, ArgumentsHost } from '@nestjs/common';
 import { Response } from 'express';
-import { AppException } from './exceptions/app.exception';
-import { NotFoundException } from './exceptions/not-found.exception';
+import { AppException } from './common/exceptions/app.exception';
+import { NotFoundException } from './common/exceptions/not-found.exception';
 
 @Catch()
 export class AppExceptionsFilter implements ExceptionFilter {

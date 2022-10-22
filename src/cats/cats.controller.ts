@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
-import { Id } from 'src/valueObjects/id';
+import { Id } from 'src/common/valueObjects/id';
 import { CatDto } from './dto/cat.dto';
 import { CatsService } from './services/cats.service';
 

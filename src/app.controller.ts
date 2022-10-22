@@ -1,4 +1,10 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, HttpCode } from '@nestjs/common';
 
-@Controller('api')
-export class AppController {}
+@Controller()
+export class AppController {
+    @Get('health')
+    @HttpCode(200)
+    health() {
+        return { healthy: true };
+    }
+}

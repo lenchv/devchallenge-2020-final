@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { NotFoundException } from 'src/exceptions/not-found.exception';
-import { Criteria } from 'src/repositories/criteria';
-import { Repository } from 'src/repositories/repository';
-import { Id } from 'src/valueObjects/id';
+import { NotFoundException } from 'src/common/exceptions/not-found.exception';
+import { Criteria } from 'src/common/repositories/criteria';
+import { Repository } from 'src/common/repositories/repository';
+import { Id } from 'src/common/valueObjects/id';
 import { Cat } from '../entities/cat.entity';
 
 @Injectable()

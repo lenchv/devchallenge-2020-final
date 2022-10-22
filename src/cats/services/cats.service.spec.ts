@@ -1,4 +1,4 @@
-import { Id } from 'src/valueObjects/id';
+import { Id } from 'src/common/valueObjects/id';
 import { Cat } from '../entities/cat.entity';
 import { CatsRepository } from '../repositories/cats.repository';
 import { CatsService } from './cats.service';
