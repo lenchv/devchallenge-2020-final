@@ -5,8 +5,7 @@ services:
       dockerfile: Dockerfile
       context: .
     depends_on:
-      - "mongo"
-      # - "neo4j"
+      - "db"
     ports:
       - 8080:8080
   node:
@@ -14,9 +13,12 @@ services:
     working_dir: /app
     volumes:
       - "./:/app"
-  mongo:
-    image: mongo:6.0.2
+  db:
+    image: mysql:8
     environment:
-      - MONGODB_DATABASE="devchallenge"
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=mydb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=secret
     ports:
-      - 27017:27017
+      - 3306:3306

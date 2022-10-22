@@ -1,12 +1,25 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppExceptionsFilter } from './app-exceptions.filter';
 import { AppController } from './app.controller';
 import { CatsModule } from './cats/cats.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { getConfig } from 'config/database.config';
 
 @Module({
-    imports: [ConfigModule.forRoot(), CatsModule],
+    imports: [
+        ConfigModule.forRoot(),
+        TypeOrmModule.forRootAsync({
+            imports: [ConfigModule],
+            useFactory: (configService: ConfigService) => ({
+                ...getConfig(configService),
+                entities: [],
+            }),
+            inject: [ConfigService],
+        }),
+        CatsModule,
+    ],
     controllers: [AppController],
     providers: [
         {

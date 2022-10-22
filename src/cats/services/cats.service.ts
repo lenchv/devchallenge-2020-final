@@ -12,7 +12,6 @@ export class CatsService {
 
     async getCat(id: Id): Promise<Cat> {
         const cat = await this.catsRepository.findById(id);
-
         if (!cat) {
             throw new NotFoundException('cat is not found!');
         }

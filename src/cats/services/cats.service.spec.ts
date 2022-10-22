@@ -8,7 +8,9 @@ describe('CatsService', () => {
     let catsRepository: CatsRepository;
 
     beforeEach(async () => {
-        catsRepository = new CatsRepository();
+        catsRepository = <CatsRepository>{};
+        catsRepository.findById = jest.fn();
+        catsRepository.add = jest.fn();
         catsService = new CatsService(catsRepository);
     });
 
