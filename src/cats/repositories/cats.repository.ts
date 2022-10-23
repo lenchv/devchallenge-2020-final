@@ -15,7 +15,10 @@ export class CatsRepository implements IRepository<Cat> {
     ) {}
 
     async findById(id: Id): Promise<Cat | undefined> {
-        const cat = await this.catsData.findOneBy({ id: String(id) });
+        const cat = await this.catsData.findOne({
+            where: { id: String(id) },
+            relations: { owner: true },
+        });
 
         if (!cat) {
             return;

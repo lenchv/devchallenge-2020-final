@@ -1,7 +1,11 @@
-import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Put } from '@nestjs/common';
 import { Id } from 'src/common/valueObjects/id';
-import { CatDto } from './dto/cat.dto';
+import { CatInterface } from './interfaces/cat.interface';
 import { CatsService } from './services/cats.service';
+
+type OwnerData = {
+    human: string;
+};
 
 @Controller('cats')
 export class CatsController {
@@ -9,7 +13,7 @@ export class CatsController {
 
     @Get(':id')
     @HttpCode(200)
-    async findById(@Param('id') id): Promise<CatDto> {
+    async findById(@Param('id') id: string): Promise<CatInterface> {
         const cat = await this.catsService.getCat(new Id(id));
 
         return cat.toJSON();
@@ -17,9 +21,15 @@ export class CatsController {
 
     @Post('/')
     @HttpCode(201)
-    async create(@Body() catData: CatDto): Promise<CatDto> {
+    async create(@Body() catData: CatInterface): Promise<CatInterface> {
         const cat = await this.catsService.addCat(catData);
 
         return cat.toJSON();
+    }
+
+    @Put('/:id/owner')
+    @HttpCode(200)
+    async attachOwner(@Param('id') catId: string, @Body() humanData: OwnerData): Promise<void> {
+        await this.catsService.attachOwner(new Id(catId), new Id(humanData.human));
     }
 }
