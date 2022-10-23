@@ -1,4 +1,5 @@
 import { Controller, Get, HttpCode } from '@nestjs/common';
+import { CatsRepository } from './cats/repositories/cats.repository';
 
 @Controller()
 export class AppController {

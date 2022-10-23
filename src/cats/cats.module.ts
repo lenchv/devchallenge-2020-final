@@ -7,6 +7,7 @@ import { CatModel } from './models/cat.model';
 
 @Module({
     imports: [TypeOrmModule.forFeature([CatModel])],
+    exports: [CatsRepository],
     controllers: [CatsController],
     providers: [CatsService, CatsRepository],
 })

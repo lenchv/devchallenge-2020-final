@@ -1,48 +1,49 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { CatsModule } from 'src/cats/cats.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { getConfig } from '../config/database.config';
 import { CatsRepository } from 'src/cats/repositories/cats.repository';
-import { CatModel } from 'src/cats/models/cat.model';
+import { createTestingApp } from './helpers/create-testing-app';
+import { DbTestService } from './helpers/DbTestService';
+import { Id } from 'src/common/valueObjects/id';
+import { Cat } from 'src/cats/entities/cat.entity';
 
 describe('Cats (e2e)', () => {
     let app: INestApplication;
     let catsRepo: CatsRepository;
+    let dbService: DbTestService;
+
+    beforeAll(async () => {
+        app = await createTestingApp();
+        await app.init();
+        catsRepo = app.get(CatsRepository);
+    });
 
     beforeEach(async () => {
-        const moduleFixture: TestingModule = await Test.createTestingModule({
-            imports: [
-                ConfigModule.forRoot({ envFilePath: __dirname + '/../.env.testing' }),
-                TypeOrmModule.forRootAsync({
-                    imports: [ConfigModule],
-                    useFactory: (configService: ConfigService) => ({
-                        ...getConfig(configService),
-                        entities: [],
-                        autoLoadEntities: true,
-                    }),
-                    inject: [ConfigService],
-                }),
-                CatsModule,
-                TypeOrmModule.forFeature([CatModel]),
-            ],
-            exports: [],
-            providers: [CatsRepository],
-        }).compile();
+        dbService = app.get(DbTestService);
+        await dbService.runMigrations();
+    });
 
-        app = moduleFixture.createNestApplication();
-        catsRepo = app.get(CatsRepository);
-        await app.init();
+    afterEach(async () => {
+        dbService = app.get(DbTestService);
+        await dbService.dropDatabase();
     });
 
     afterAll(async () => {
         await app.close();
     });
 
-    it('POST /api/people/ success', async () => {
+    it('POST /cats/ success', async () => {
         const result = await request(app.getHttpServer()).post('/cats').send({ name: 'puffy' }).expect(201);
         expect(result.body).toMatchObject({ name: 'puffy' });
+        const cat = await catsRepo.findById(new Id(result.body.id));
+        expect(cat.name).toEqual('puffy');
+    });
+
+    it('GET /cats/:id success', async () => {
+        const cat = new Cat(new Id('1'), 'murzik');
+        await catsRepo.add(cat);
+        await request(app.getHttpServer()).get('/cats/1').expect(200).expect({
+            id: '1',
+            name: 'murzik',
+        });
     });
 });
