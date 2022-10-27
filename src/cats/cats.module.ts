@@ -12,11 +12,7 @@ import { AddressesRepository } from './repositories/addresses.repository';
 import { HumansController } from './humans.controller';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([CatModel]),
-        TypeOrmModule.forFeature([HumanModel]),
-        TypeOrmModule.forFeature([AddressModel]),
-    ],
+    imports: [TypeOrmModule.forFeature([CatModel, HumanModel, AddressModel])],
     exports: [CatsRepository, HumansRepository],
     controllers: [CatsController, HumansController],
     providers: [CatsService, CatsRepository, HumansService, HumansRepository, AddressesRepository],

@@ -4,12 +4,11 @@ WORKDIR /app
 
 COPY ./ /app
 
-ENV MONGODB_URI=mongodb://mongo:27017/devchallenge 
-ENV NEO4J_SCHEME=neo4j 
-ENV NEO4J_HOST=neo4j 
-ENV NEO4J_PORT=7687 
-ENV NEO4J_USER=neo4j 
-ENV NEO4J_PASSWORD=neo 
+env DB_HOST=db
+env DB_PORT=3306
+env DB_USER=root
+env DB_PASSWORD=secret
+env DB_NAME=mydb
 
 RUN npm i -g pm2 \
     && npm i \
@@ -17,4 +16,4 @@ RUN npm i -g pm2 \
     && rm -rf node_modules \
     && npm i --production
 
-CMD pm2 start dist/main.js --no-daemon
+CMD pm2 start dist/src/main.js --no-daemon
