@@ -82,4 +82,17 @@ describe('Cats (e2e)', () => {
                 details: {},
             });
     });
+
+    it('POST /image-input/ incorrect image color scheme', async () => {
+        const fileData = await fs.readFile(path.join(__dirname, 'images', 'incorrect.png'), 'base64');
+        await request(app.getHttpServer())
+            .post('/image-input')
+            .send({ min_level: 50, image: fileData })
+            .expect(422)
+            .expect({
+                // eslint-disable-next-line max-len
+                error: 'Cannot detect the cells in the passed image. Please, make sure the passed image staisfies the requirements.',
+                details: {},
+            });
+    });
 });

@@ -80,8 +80,9 @@ export class GridService {
         }, {});
 
         return Object.keys(hashNumbers)
+            .sort((a, b) => hashNumbers[b] - hashNumbers[a])
             .map((n) => Number(n))
-            .sort((a, b) => hashNumbers[b] - hashNumbers[a]);
+            .filter((n) => n > 1);
     }
 
     private getMostAppropriateSize(rowSizes: number[], columnSizes: number[]): Size {
@@ -93,7 +94,10 @@ export class GridService {
             }
         }
 
-        throw new AppException('Cannot detect the cells in the passed image');
+        throw new AppException(
+            // eslint-disable-next-line max-len
+            'Cannot detect the cells in the passed image. Please, make sure the passed image staisfies the requirements.',
+        );
     }
 
     private getCells(rows: Pixel[][], cellSize: Size, imageSize: Size): Cell[] {

@@ -8,7 +8,7 @@ describe('ImageService', () => {
         imageService = new ImageService();
     });
 
-    it('should iterate by columns', async () => {
+    it('should iterate by columns correctly', async () => {
         const data = Buffer.from([
             // eslint-disable-next-line prettier/prettier
             0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,

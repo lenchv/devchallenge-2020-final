@@ -10,4 +10,4 @@ RUN npm i -g pm2 \
     && rm -rf node_modules \
     && npm i --production
 
-CMD pm2 start dist/src/main.js --no-daemon
+CMD pm2 start dist/main.js --no-daemon
