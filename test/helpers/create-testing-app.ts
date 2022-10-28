@@ -1,33 +1,18 @@
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { INestApplication } from '@nestjs/common';
-import { getConfig } from '../../config/database.config';
-import { CatsModule } from 'src/cats/cats.module';
-import { DbTestService } from './DbTestService';
-import { readMigrations } from '../../database/read-migrations';
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { AppModule } from 'src/app.module';
 
-export const createTestingApp = async (): Promise<INestApplication> => {
-    const migrations = await readMigrations();
+export const createTestingApp = async (): Promise<NestFastifyApplication> => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [
-            ConfigModule.forRoot({ envFilePath: __dirname + '/../../.env.testing' }),
-            TypeOrmModule.forRootAsync({
-                imports: [ConfigModule],
-                useFactory: (configService: ConfigService) => ({
-                    ...getConfig(configService),
-                    entities: [],
-                    migrations: migrations,
-                    migrationsRun: true,
-                    autoLoadEntities: true,
-                }),
-                inject: [ConfigService],
-            }),
-            CatsModule,
-        ],
+        imports: [AppModule],
         exports: [],
-        providers: [DbTestService],
+        providers: [],
     }).compile();
 
-    return moduleFixture.createNestApplication();
+    const app = moduleFixture.createNestApplication<NestFastifyApplication>(
+        new FastifyAdapter({ bodyLimit: 50 * 1024 * 1024 }),
+    );
+    await app.init();
+    await app.getHttpAdapter().getInstance().ready();
+    return app;
 };

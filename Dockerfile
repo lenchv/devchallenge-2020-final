@@ -4,12 +4,6 @@ WORKDIR /app
 
 COPY ./ /app
 
-env DB_HOST=db
-env DB_PORT=3306
-env DB_USER=root
-env DB_PASSWORD=secret
-env DB_NAME=mydb
-
 RUN npm i -g pm2 \
     && npm i \
     && npm run build \
