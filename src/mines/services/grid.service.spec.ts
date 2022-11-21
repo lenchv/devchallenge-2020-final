@@ -76,5 +76,14 @@ describe('ImageService', () => {
                 [ [ 0, 100 ], [ 0, 100 ] ]
             ]
         );
+        // prettier-ignore
+        expect(grid[1].map((cell) => cell.toJSON().data)).toStrictEqual(
+            [
+                [ [ 100, 100 ], [ 100, 100 ] ],
+                [ [ 100, 100 ], [ 100, 100 ] ],
+                [ [ 100, 100 ], [ 100, 100 ] ],
+                [ [ 100, 100 ], [ 100, 100 ] ]
+            ]
+        );
     });
 });
